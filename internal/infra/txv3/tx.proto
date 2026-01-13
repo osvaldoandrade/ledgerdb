@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package ledgerdb.v3;
+
+option go_package = "github.com/codecompany/ledgerdb/internal/infra/txv3;txv3";
+
+message Transaction {
+  string tx_id = 1;
+  int64 timestamp = 2;
+  string collection = 3;
+  string doc_id = 4;
+
+  enum Op {
+    UNKNOWN = 0;
+    PUT = 1;
+    PATCH = 2;
+    DELETE = 3;
+    MERGE = 4;
+  }
+
+  Op op = 5;
+
+  oneof payload {
+    bytes snapshot = 6;
+    bytes patch = 7;
+  }
+
+  string parent_hash = 8;
+  string schema_version = 9;
+}

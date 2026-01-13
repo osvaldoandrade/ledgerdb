@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+while read -r oldrev newrev refname; do
+  if [ "$oldrev" = "0000000000000000000000000000000000000000" ]; then
+    range="$newrev"
+  else
+    range="$oldrev..$newrev"
+  fi
+
+  for commit in $(git rev-list "$range"); do
+    if ! git verify-commit "$commit" >/dev/null 2>&1; then
+      echo "rejecting unsigned or invalid commit: $commit" >&2
+      exit 1
+    fi
+  done
+done
