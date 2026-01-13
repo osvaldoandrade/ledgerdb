@@ -41,8 +41,10 @@ These commands handle the lifecycle of the storage engine.
 | Command | Description | Git Analog |
 | :--- | :--- | :--- |
 | `ledgerdb init --name <db>` | Initializes a bare repo and `db.yaml` manifest. | `git init --bare` |
+| `ledgerdb init --remote <url>` | Initializes and sets `origin` for later sync. | `git remote add origin` |
 | `ledgerdb clone <url>` | Downloads a full replica of the database. | `git clone` |
 | `ledgerdb status` | Shows repo head hash and manifest metadata. | `git status` |
+| `ledgerdb push` | Pushes `main` to `origin`. | `git push` |
 
 * **Auto Sync (default):** Write commands fetch before commit and push after. Disable with `--sync=false` or `LEDGERDB_AUTO_SYNC=false`.
 
@@ -107,12 +109,12 @@ ledgerdb index watch --db ./index.db --interval 5s --batch-commits 200 --fast --
 ```
 
 * **Behavior:** Walks new commits (optionally `--fetch`) and upserts documents into tables derived from collection names.
-* **State:** The last synced commit hash is stored in the SQLite database to allow incremental updates.
+* **State:** The last synced commit hash and state tree hash are stored in SQLite to allow incremental updates.
 * **Tables:** Each collection maps to `collection_<name>` (see `collection_registry` for the exact mapping).
 * **Polling:** `--interval` controls how often to fetch+sync (default: 5s); `--only-changes` silences no-op cycles; `--once` runs a single sync and exits; `--jitter` adds randomized delay; `--quiet` suppresses output.
 * **Batching:** `--batch-commits` groups commits into a single SQLite transaction to reduce overhead on large histories.
 * **Performance:** `--fast` relaxes SQLite durability for faster indexing (safe because the index is rebuildable).
-* **Source Mode:** `--mode state` indexes from the materialized state tree (`state/`) rather than replaying history.
+* **Source Mode:** `--mode state` indexes from the materialized state tree (`state/`) rather than replaying history (default in the CLI).
 
 ## 4. Observability & Debugging
 

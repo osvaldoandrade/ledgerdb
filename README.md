@@ -13,7 +13,34 @@ This document serves as the **Master Specification**, outlining the system's arc
 
 ---
 
-## 2. Architecture Overview
+## 2. Get Started (CLI)
+
+```bash
+# Build the CLI
+make build
+
+# Initialize a bare repo (recommended layout + history mode)
+ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode append
+
+# Apply a collection schema (example)
+ledgerdb collection apply tasks --schema ./schemas/task.json --indexes "status,assignee"
+
+# Write and read documents
+ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
+ledgerdb doc get tasks "task_0001"
+
+# Watch the SQLite sidecar index (state-based, O(changes))
+ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-commits 200
+```
+
+**Notes**
+* **Sharded layout:** `--layout sharded` spreads documents across deep directories for stable filesystem performance.
+* **State mode indexing:** `--mode state` reads from `state/` and only applies changed docs. It is the recommended mode for near real-time indexing.
+* **History modes:** `append` preserves full audit history; `amend` keeps only the latest state per document.
+
+---
+
+## 3. Architecture Overview
 
 The system is architected as a "Smart Client, Dumb Storage" engine. The complexity of concurrency control, validation, and query execution resides in the client (CLI/SDK), while the storage layer is a pure, dumb Git Bare Repository.
 
@@ -27,7 +54,7 @@ graph TD
 ```
 ---
 
-## 3. The Storage Engine
+## 4. The Storage Engine
 [`Storage Interface`](docs/01_STORAGE_INTERFACE.md)
 
 The storage layer is responsible for mapping logical keys to physical files without performance degradation.
@@ -37,7 +64,7 @@ The storage layer is responsible for mapping logical keys to physical files with
 
 ---
 
-## 4. Partitioning & Distribution Strategy
+## 5. Partitioning & Distribution Strategy
 [`Partitioning`](docs/02_PARTITIONING.md)
 
 To scale to millions of documents, LedgerDB uses a deterministic partitioning scheme.
@@ -46,7 +73,7 @@ To scale to millions of documents, LedgerDB uses a deterministic partitioning sc
 
 ---
 
-## 5. Data Versioning & Causality
+## 6. Data Versioning & Causality
 [`Versioning`](docs/03_VERSIONING.md)
 
 LedgerDB abandons "Wall-Clock Time" in favor of **Causal History**.
@@ -56,7 +83,7 @@ LedgerDB abandons "Wall-Clock Time" in favor of **Causal History**.
 
 ---
 
-## 6. Execution Model: The Write Path
+## 7. Execution Model: The Write Path
 [`Execution`](docs/04_Execution.md)
 
 High availability for writes is achieved through **Optimistic Concurrency Control**.
@@ -66,7 +93,7 @@ High availability for writes is achieved through **Optimistic Concurrency Contro
 
 ---
 
-## 7. Querying & Indexing
+## 8. Querying & Indexing
 [`Querying`](docs/05_QUERYING.md)
 
 
@@ -78,7 +105,7 @@ While the primary access pattern is Key-Value, LedgerDB supports secondary index
 
 ---
 
-## 8. Integrity & Security
+## 9. Integrity & Security
 [`Integrity`](docs/06_INTEGRITY.md)
 
 Security is built-in, not bolted on.
@@ -87,7 +114,7 @@ Security is built-in, not bolted on.
 
 ---
 
-## 9. Replication & Synchronization
+## 10. Replication & Synchronization
 [`Replication`](docs/07_REPLICATION.md)
 
 LedgerDB delegates replication to the robust Git protocol.
@@ -96,7 +123,7 @@ LedgerDB delegates replication to the robust Git protocol.
 
 ---
 
-## 10. Operational Tooling (CLI)
+## 11. Operational Tooling (CLI)
 [`Ops`](docs/08_OPS.md)
 
 
@@ -111,7 +138,7 @@ The `ledgerdb` CLI is the primary operator interface.
 * **Sync:** writes auto-fetch and auto-push by default (`--sync=false` to disable; `LEDGERDB_AUTO_SYNC=false`).
 * **Dev Checks:** `go test ./...`, `go test -race ./...`, `go vet ./...`, `golangci-lint run` (uses `.golangci.yml`).
 
-### 10.1 CLI Quick Start
+### 11.1 CLI Quick Start
 
 ```bash
 # Build
@@ -161,7 +188,7 @@ ledgerdb maintenance gc --prune=now
 ledgerdb maintenance snapshot --threshold 50
 ```
 
-### 10.2 Build & Install (Makefile)
+### 11.2 Build & Install (Makefile)
 
 ```bash
 make build
@@ -173,7 +200,7 @@ make install
 
 ---
 
-## 11. Client SDK Specifications
+## 12. Client SDK Specifications
 [`SDK`](docs/09_SDK_SPECS.md)
 
 
@@ -182,7 +209,7 @@ Standardization for language-specific implementations (Go, Node.js, Rust).
 
 ---
 
-## 12. Future Work & Extensions
+## 13. Future Work & Extensions
 
 * **Blob Storage:** Handling large binary assets (images/PDFs) via `git-lfs` integration.
 * **Archive Nodes:** Strategies for "Cold Storage" and history truncation (pruning).

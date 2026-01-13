@@ -123,7 +123,7 @@ graph LR
 
 The SQLite sidecar defines a stable projection contract for per-collection tables.
 
-* **State Table:** `ledger_index_state(id=1, last_commit)` stores the last applied commit hash.
+* **State Table:** `ledger_index_state(id=1, last_commit, last_state_tree)` stores the last applied commit hash and the last synced `state/` tree hash.
 * **Registry Table:** `collection_registry(collection, table_name)` maps collection names to tables.
 * **Collection Tables:** `collection_<name>` with:
   * `doc_id` (TEXT PRIMARY KEY)
@@ -133,6 +133,7 @@ The SQLite sidecar defines a stable projection contract for per-collection table
 * **Ordering:** Transactions are applied by timestamp, then `tx_id` for deterministic replay.
 * **Rules:** `put/merge/patch` upsert rows; `delete` sets `deleted=1` (payload may be NULL).
 * **Assumptions:** Merge commits are not supported; patch requires an existing document.
+* **State Mode:** `--mode state` compares `state/` trees and applies only changed documents (O(changes)), using `last_state_tree` as the cursor.
 
 ## 5. Query Interface
 
