@@ -126,13 +126,14 @@
             </div>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-ledger-muted">
+                <a href="#get-started" class="hover:text-white transition-colors">Get Started</a>
                 <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
                 <a href="#workflow" class="hover:text-white transition-colors">Write Flow</a>
                 <a href="#performance" class="hover:text-white transition-colors">Performance</a>
                 <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
             </div>
 
-            <a href="https://github.com/codecompany" target="_blank" class="group relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-ledger-border rounded-full shadow-md hover:bg-white/5">
+            <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="group relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-ledger-border rounded-full shadow-md hover:bg-white/5">
                 <i class="fa-brands fa-github text-lg mr-2"></i>
                 <span>GitHub</span>
             </a>
@@ -156,10 +157,10 @@
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4 reveal" style="transition-delay: 300ms;">
-                <a href="#architecture" class="px-8 py-3.5 rounded-xl bg-white text-ledger-bg font-bold hover:bg-gray-200 transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                    Explore Architecture
+                <a href="#get-started" class="px-8 py-3.5 rounded-xl bg-white text-ledger-bg font-bold hover:bg-gray-200 transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    Get Started
                 </a>
-                <a href="https://github.com/codecompany" target="_blank" class="px-8 py-3.5 rounded-xl border border-ledger-border text-gray-300 hover:text-white hover:border-white transition-all duration-200">
+                <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="px-8 py-3.5 rounded-xl border border-ledger-border text-gray-300 hover:text-white hover:border-white transition-all duration-200">
                     <i class="fa-brands fa-github mr-2"></i> View Source
                 </a>
             </div>
@@ -178,8 +179,8 @@
                 </div>
                 <div class="glass-card p-4 rounded-xl text-center">
                     <div class="text-ledger-pink text-2xl mb-2"><i class="fa-solid fa-database"></i></div>
-                    <div class="font-bold text-white">LedgerSQL</div>
-                    <div class="text-xs text-gray-400">Relational View</div>
+                    <div class="font-bold text-white">SQLite Sidecar</div>
+                    <div class="text-xs text-gray-400">Instant Queries</div>
                 </div>
                 <div class="glass-card p-4 rounded-xl text-center">
                     <div class="text-emerald-400 text-2xl mb-2"><i class="fa-solid fa-fingerprint"></i></div>
@@ -191,6 +192,64 @@
     </header>
 
     <main class="space-y-32 pb-32">
+
+        <!-- SECTION 0: GET STARTED -->
+        <section id="get-started" class="container mx-auto px-4 reveal">
+            <div class="text-center mb-12">
+                <span class="text-ledger-accent font-mono text-sm tracking-widest uppercase">Get Started</span>
+                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">From Git Repo to Queryable Data</h2>
+                <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
+                    A Git-native ledger with a SQLite sidecar index for fast reads and near real-time updates.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                <div class="glass-card p-8 rounded-2xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-gem text-ledger-primary"></i> Value Proposition
+                    </h3>
+                    <ul class="space-y-3 text-sm text-gray-300">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-shield-halved text-ledger-accent mt-1"></i>
+                            <span><strong>Git-native ledger</strong> with tamper-evident history and offline-first sync.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-wave-square text-ledger-pink mt-1"></i>
+                            <span><strong>State tree indexing</strong> applies only changed docs (O(changes)) for fast rebuilds.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-diagram-project text-emerald-400 mt-1"></i>
+                            <span><strong>Sharded layout</strong> keeps filesystem performance stable at scale.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-clock-rotate-left text-ledger-primary mt-1"></i>
+                            <span><strong>History modes</strong>: append (audit) or amend (compact).</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-terminal text-ledger-accent"></i> CLI Quick Start
+                    </h3>
+                    <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code># Build
+make build
+
+# Init repo (sharded + append history)
+ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode append
+
+# Apply schema and write data
+ledgerdb collection apply tasks --schema ./schemas/task.json --indexes "status,assignee"
+ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
+
+# Watch the SQLite index (state mode)
+ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-commits 200</code></pre>
+                    <p class="text-xs text-gray-400 mt-3">
+                        Tip: use <span class="text-white">--history-mode amend</span> for compact state-only repos, or <span class="text-white">--sync=false</span> for offline writes.
+                    </p>
+                </div>
+            </div>
+        </section>
 
         <!-- SECTION 1: ARCHITECTURE (Visual Tree) -->
         <section id="architecture" class="container mx-auto px-4 reveal">
@@ -377,9 +436,9 @@
         <section id="performance" class="container mx-auto px-4 reveal">
             <div class="mb-12 flex flex-col md:flex-row justify-between items-end border-b border-ledger-border pb-6">
                 <div>
-                    <span class="text-ledger-accent font-mono text-sm tracking-widest uppercase">Complexity Analysis</span>
-                    <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">Predictable Performance</h2>
-                    <p class="text-gray-400 mt-2">Writes are O(S). Reads use a sawtooth strategy.</p>
+                    <span class="text-ledger-accent font-mono text-sm tracking-widest uppercase">Performance</span>
+                    <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">Predictable, Measured, Rebuildable</h2>
+                    <p class="text-gray-400 mt-2">Writes are O(1) appends. Reads are rehydrated or served from the SQLite sidecar.</p>
                 </div>
                 <div class="mt-4 md:mt-0 text-right">
                     <div class="text-ledger-pink font-bold text-3xl">32</div>
@@ -419,6 +478,60 @@
                     </div>
                     <p class="text-xs text-center text-gray-500 mt-4">Read cost resets every 32 transactions (Snapshot)</p>
                 </div>
+            </div>
+
+            <!-- Benchmarks Table -->
+            <div class="glass-card p-6 rounded-2xl mt-8">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high text-ledger-accent"></i> Local Benchmarks (CLI)
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs md:text-sm">
+                        <thead class="text-gray-400">
+                            <tr class="border-b border-ledger-border">
+                                <th class="text-left py-2 pr-4">Scenario</th>
+                                <th class="text-left py-2 pr-4">History</th>
+                                <th class="text-left py-2 pr-4">Index Mode</th>
+                                <th class="text-left py-2 pr-4">Dataset</th>
+                                <th class="text-left py-2 pr-4">Avg Writes/sec</th>
+                                <th class="text-left py-2 pr-4">Read Freshness</th>
+                                <th class="text-left py-2">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-200">
+                            <tr class="border-b border-ledger-border/50">
+                                <td class="py-2 pr-4">Append + Sharded</td>
+                                <td class="py-2 pr-4">append</td>
+                                <td class="py-2 pr-4">state</td>
+                                <td class="py-2 pr-4">5000 puts / 2500 updates / 100 deletes</td>
+                                <td class="py-2 pr-4">56.72</td>
+                                <td class="py-2 pr-4">1s watch</td>
+                                <td class="py-2">Full history + state tree diff</td>
+                            </tr>
+                            <tr class="border-b border-ledger-border/50">
+                                <td class="py-2 pr-4">Amend + Sharded</td>
+                                <td class="py-2 pr-4">amend</td>
+                                <td class="py-2 pr-4">state</td>
+                                <td class="py-2 pr-4">2000 puts / 400 updates / 100 deletes</td>
+                                <td class="py-2 pr-4">65.79</td>
+                                <td class="py-2 pr-4">1s watch</td>
+                                <td class="py-2">Compact history, fast rebuild</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 pr-4">State Watch 250ms</td>
+                                <td class="py-2 pr-4">append</td>
+                                <td class="py-2 pr-4">state</td>
+                                <td class="py-2 pr-4">1000 puts / 200 updates / 40 deletes</td>
+                                <td class="py-2 pr-4">65.26</td>
+                                <td class="py-2 pr-4">250ms watch</td>
+                                <td class="py-2">Near real-time index</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">
+                    Throughput = total writes/sec from CLI tests. Read freshness reflects watch interval; SQLite query latency depends on local disk and query shape.
+                </p>
             </div>
         </section>
 
@@ -470,8 +583,8 @@
             <h4 class="text-2xl font-display font-bold text-white mb-2">LedgerDB</h4>
             <p class="text-gray-500 mb-8 max-w-sm mx-auto">The open-source, git-native database for high-integrity systems.</p>
             
-            <a href="https://github.com/codecompany" target="_blank" class="inline-flex items-center text-gray-400 hover:text-white transition-colors">
-                <i class="fa-brands fa-github text-xl mr-2"></i> codecompany
+            <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="inline-flex items-center text-gray-400 hover:text-white transition-colors">
+                <i class="fa-brands fa-github text-xl mr-2"></i> osvaldoandrade/ledgerdb
             </a>
 
             <div class="mt-12 pt-8 border-t border-white/5 text-xs text-gray-700">
