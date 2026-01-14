@@ -363,9 +363,9 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
         <section id="workflow" class="container mx-auto px-4 reveal">
             <div class="text-center mb-12">
                 <span class="text-ledger-pink font-mono text-sm tracking-widest uppercase">Concurrency Model</span>
-                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">The 9-Step Deterministic Write</h2>
+                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">CAS Write Flow (Optimistic)</h2>
                 <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
-                    How LedgerDB guarantees integrity without a central server.
+                    Writes are serialized by an atomic compare-and-set on <span class="text-white">refs/heads/main</span>, with retries on conflict.
                 </p>
             </div>
 
@@ -374,20 +374,20 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 <div class="hidden lg:block absolute top-1/2 left-0 w-full h-1 bg-ledger-border -z-10 rounded-full transform -translate-y-1/2"></div>
 
                 <!-- Steps Generation -->
-                <!-- 1. Lock -->
+                <!-- 1. Read Ref -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
                     <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-ledger-primary transition-colors">1</div>
-                    <i class="fa-solid fa-lock text-ledger-primary text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Acquire Lock</h4>
-                    <p class="step-desc">Lock local file mutex</p>
+                    <i class="fa-solid fa-code-branch text-ledger-primary text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-white">Read Main Ref</h4>
+                    <p class="step-desc">Load refs/heads/main</p>
                 </div>
 
-                <!-- 2. Read -->
+                <!-- 2. Read Stream -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
                     <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">2</div>
                     <i class="fa-solid fa-glasses text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Read HEAD</h4>
-                    <p class="step-desc">Get current pointer</p>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Read Stream HEAD</h4>
+                    <p class="step-desc">Resolve current tx pointer</p>
                 </div>
 
                 <!-- 3. Build -->
@@ -402,8 +402,8 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
                     <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">4</div>
                     <i class="fa-solid fa-link text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Hash Chain</h4>
-                    <p class="step-desc">Compute SHA-256 links</p>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Canonicalize</h4>
+                    <p class="step-desc">Compute SHA-256 hashes</p>
                 </div>
 
                 <!-- 5. Validate -->
@@ -414,36 +414,36 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                     <p class="step-desc">Check JSON Schema</p>
                 </div>
 
-                <!-- 6. Commit (Highlight) -->
+                <!-- 6. Write Blobs (Highlight) -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg border-ledger-accent/50">
                     <div class="w-8 h-8 rounded-full bg-ledger-accent text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg shadow-[0_0_10px_rgba(6,182,212,0.5)]">6</div>
                     <i class="fa-solid fa-file-export text-ledger-accent text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Atomic Write</h4>
-                    <p class="step-desc">Write file to disk</p>
+                    <h4 class="font-bold text-xs uppercase text-white">Write Blobs</h4>
+                    <p class="step-desc">Tx + HEAD + state</p>
                 </div>
 
-                <!-- 7. Verify (Highlight) -->
+                <!-- 7. Build Commit -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg border-ledger-pink/50">
                     <div class="w-8 h-8 rounded-full bg-ledger-pink text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg shadow-[0_0_10px_rgba(236,72,153,0.5)]">7</div>
-                    <i class="fa-solid fa-shield-halved text-ledger-pink text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Verify Head</h4>
-                    <p class="step-desc">Optimistic check</p>
+                    <i class="fa-solid fa-diagram-project text-ledger-pink text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-white">Build Commit</h4>
+                    <p class="step-desc">Update tree + commit</p>
                 </div>
 
-                <!-- 8. Update -->
+                <!-- 8. CAS Update -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
                     <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">8</div>
-                    <i class="fa-solid fa-location-arrow text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Move Head</h4>
-                    <p class="step-desc">Update pointer file</p>
+                    <i class="fa-solid fa-shield-halved text-gray-400 text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">CAS Update</h4>
+                    <p class="step-desc">Check-and-set main ref</p>
                 </div>
 
-                <!-- 9. Release -->
+                <!-- 9. Retry -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
                     <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">9</div>
-                    <i class="fa-solid fa-unlock text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Free Lock</h4>
-                    <p class="step-desc">Release mutex</p>
+                    <i class="fa-solid fa-rotate-right text-gray-400 text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Retry/Backoff</h4>
+                    <p class="step-desc">On conflict, retry</p>
                 </div>
             </div>
         </section>
