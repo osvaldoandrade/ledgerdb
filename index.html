@@ -231,8 +231,9 @@
                         </h3>
                         <div class="flex flex-wrap gap-2" role="tablist" aria-label="Quick start tabs">
                             <button class="tab-btn active" data-tab="cli" type="button" aria-selected="true">CLI</button>
-                            <button class="tab-btn" data-tab="go" type="button" aria-selected="false">Go SDK</button>
-                            <button class="tab-btn" data-tab="ts" type="button" aria-selected="false">TypeScript SDK</button>
+                            <button class="tab-btn" data-tab="go" type="button" aria-selected="false">Go</button>
+                            <button class="tab-btn" data-tab="rust" type="button" aria-selected="false">Rust</button>
+                            <button class="tab-btn" data-tab="ts" type="button" aria-selected="false">TypeScript</button>
                         </div>
                     </div>
 
@@ -273,6 +274,31 @@ func main() {
     Interval: "1s",
     Fast: true,
   })
+}</code></pre>
+                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
+                    </div>
+
+                    <div class="tab-panel" data-tab-panel="rust">
+                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>use ledgerdb::Client; // preview
+
+#[tokio::main]
+async fn main() -> Result<(), ledgerdb::Error> {
+    let db = Client::open("./ledgerdb.git").await?;
+    db.collection("tasks")
+        .put("task_0001", serde_json::json!({
+            "title": "Ship v1",
+            "status": "todo",
+            "priority": "high"
+        }))
+        .await?;
+
+    db.index().watch(ledgerdb::IndexOptions {
+        db_path: "./index.db".into(),
+        mode: "state".into(),
+        interval: "1s".into(),
+        fast: true,
+    }).await?;
+    Ok(())
 }</code></pre>
                         <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
                     </div>
