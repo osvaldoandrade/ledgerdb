@@ -111,6 +111,29 @@
             opacity: 1;
             margin-top: 0.5rem;
         }
+
+        .tab-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            color: #94A3B8;
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: #F8FAFC;
+            color: #0F172A;
+            border-color: transparent;
+            box-shadow: 0 8px 20px -12px rgba(248, 250, 252, 0.6);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -201,11 +224,20 @@
             </div>
 
             <div class="max-w-4xl mx-auto">
-                <div class="glass-card p-8 rounded-2xl">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-terminal text-ledger-accent"></i> CLI Quick Start
-                    </h3>
-                    <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code># Build
+                <div class="glass-card p-8 rounded-2xl" data-tab-group="quickstart">
+                    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-terminal text-ledger-accent"></i> Quick Start
+                        </h3>
+                        <div class="flex flex-wrap gap-2" role="tablist" aria-label="Quick start tabs">
+                            <button class="tab-btn active" data-tab="cli" type="button" aria-selected="true">CLI</button>
+                            <button class="tab-btn" data-tab="go" type="button" aria-selected="false">Go SDK</button>
+                            <button class="tab-btn" data-tab="ts" type="button" aria-selected="false">TypeScript SDK</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel active" data-tab-panel="cli">
+                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code># Build
 make build
 
 # Init repo (sharded + append history)
@@ -217,9 +249,52 @@ ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo"
 
 # Watch the SQLite index (state mode)
 ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-commits 200</code></pre>
-                    <p class="text-xs text-gray-400 mt-3">
-                        Tip: use <span class="text-white">--history-mode amend</span> for compact state-only repos, or <span class="text-white">--sync=false</span> for offline writes.
-                    </p>
+                        <p class="text-xs text-gray-400 mt-3">
+                            Tip: use <span class="text-white">--history-mode amend</span> for compact state-only repos, or <span class="text-white">--sync=false</span> for offline writes.
+                        </p>
+                    </div>
+
+                    <div class="tab-panel" data-tab-panel="go">
+                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>package main
+
+import "github.com/osvaldoandrade/ledgerdb/sdk/go/ledgerdb" // preview
+
+func main() {
+  db, _ := ledgerdb.Open("./ledgerdb.git")
+  _ = db.Collection("tasks").Put("task_0001", map[string]any{
+    "title": "Ship v1",
+    "status": "todo",
+    "priority": "high",
+  })
+
+  _ = db.Index().Watch(ledgerdb.IndexOptions{
+    Path: "./index.db",
+    Mode: "state",
+    Interval: "1s",
+    Fast: true,
+  })
+}</code></pre>
+                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
+                    </div>
+
+                    <div class="tab-panel" data-tab-panel="ts">
+                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>import { LedgerDB } from "@ledgerdb/sdk"; // preview
+
+const db = await LedgerDB.open({ repo: "./ledgerdb.git" });
+await db.collection("tasks").put("task_0001", {
+  title: "Ship v1",
+  status: "todo",
+  priority: "high"
+});
+
+await db.index.watch({
+  db: "./index.db",
+  mode: "state",
+  interval: "1s",
+  fast: true
+});</code></pre>
+                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -600,6 +675,28 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
             }, { threshold: 0.1 });
             
             reveals.forEach(el => observer.observe(el));
+
+            const tabGroups = document.querySelectorAll('[data-tab-group]');
+            tabGroups.forEach(group => {
+                const buttons = group.querySelectorAll('[data-tab]');
+                const panels = group.querySelectorAll('[data-tab-panel]');
+                const activate = (name) => {
+                    buttons.forEach(btn => {
+                        const active = btn.dataset.tab === name;
+                        btn.classList.toggle('active', active);
+                        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+                    });
+                    panels.forEach(panel => {
+                        panel.classList.toggle('active', panel.dataset.tabPanel === name);
+                    });
+                };
+                if (buttons.length > 0) {
+                    activate(buttons[0].dataset.tab);
+                }
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => activate(btn.dataset.tab));
+                });
+            });
         });
 
         // --- 3. Throughput Chart ---
