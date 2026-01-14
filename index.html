@@ -450,61 +450,12 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                     <div class="chart-container flex-grow">
                         <canvas id="complexityChart"></canvas>
                     </div>
+                    <div class="mt-4 grid gap-2 text-xs text-gray-400">
+                        <div><span class="text-white">Append + State</span> — 5000 puts / 2500 updates / 100 deletes (1s watch)</div>
+                        <div><span class="text-white">Amend + State</span> — 2000 puts / 400 updates / 100 deletes (1s watch)</div>
+                        <div><span class="text-white">State Watch 250ms</span> — 1000 puts / 200 updates / 40 deletes</div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Benchmarks Table -->
-            <div class="glass-card p-6 rounded-2xl mt-8">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-gauge-high text-ledger-accent"></i> Local Benchmarks (CLI)
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-xs md:text-sm">
-                        <thead class="text-gray-400">
-                            <tr class="border-b border-ledger-border">
-                                <th class="text-left py-2 pr-4">Scenario</th>
-                                <th class="text-left py-2 pr-4">History</th>
-                                <th class="text-left py-2 pr-4">Index Mode</th>
-                                <th class="text-left py-2 pr-4">Dataset</th>
-                                <th class="text-left py-2 pr-4">Avg Writes/sec</th>
-                                <th class="text-left py-2 pr-4">Read Freshness</th>
-                                <th class="text-left py-2">Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-200">
-                            <tr class="border-b border-ledger-border/50">
-                                <td class="py-2 pr-4">Append + Sharded</td>
-                                <td class="py-2 pr-4">append</td>
-                                <td class="py-2 pr-4">state</td>
-                                <td class="py-2 pr-4">5000 puts / 2500 updates / 100 deletes</td>
-                                <td class="py-2 pr-4">56.72</td>
-                                <td class="py-2 pr-4">1s watch</td>
-                                <td class="py-2">Full history + state tree diff</td>
-                            </tr>
-                            <tr class="border-b border-ledger-border/50">
-                                <td class="py-2 pr-4">Amend + Sharded</td>
-                                <td class="py-2 pr-4">amend</td>
-                                <td class="py-2 pr-4">state</td>
-                                <td class="py-2 pr-4">2000 puts / 400 updates / 100 deletes</td>
-                                <td class="py-2 pr-4">65.79</td>
-                                <td class="py-2 pr-4">1s watch</td>
-                                <td class="py-2">Compact history, fast rebuild</td>
-                            </tr>
-                            <tr>
-                                <td class="py-2 pr-4">State Watch 250ms</td>
-                                <td class="py-2 pr-4">append</td>
-                                <td class="py-2 pr-4">state</td>
-                                <td class="py-2 pr-4">1000 puts / 200 updates / 40 deletes</td>
-                                <td class="py-2 pr-4">65.26</td>
-                                <td class="py-2 pr-4">250ms watch</td>
-                                <td class="py-2">Near real-time index</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p class="text-xs text-gray-500 mt-3">
-                    Throughput = total writes/sec from CLI tests. Read freshness reflects watch interval; SQLite query latency depends on local disk and query shape.
-                </p>
             </div>
         </section>
 
@@ -621,7 +572,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
         new Chart(ctxComp, {
             type: 'bar',
             data: {
-                labels: ['Append + State (1s)', 'Amend + State (1s)', 'State watch (250ms)'],
+                labels: ['Append + State', 'Amend + State', 'State watch 250ms'],
                 datasets: [{
                     label: 'Avg writes/sec',
                     data: [56.72, 65.79, 65.26],
@@ -644,7 +595,11 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 },
                 scales: { 
                     y: { grid: { display: false } },
-                    x: { beginAtZero: true, grid: { color: 'rgba(51,65,85,0.4)' } }
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(51,65,85,0.4)' },
+                        title: { display: true, text: 'avg writes/sec' }
+                    }
                 }
             }
         });
