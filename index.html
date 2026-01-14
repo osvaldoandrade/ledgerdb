@@ -470,17 +470,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        LedgerDB is for applications that need auditability, offline-first writes, and easy replication without managing a full database server. It stores immutable transactions in Git, making every clone a valid replica that can sync later.
-                    </div>
-                </details>
-
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>Is LedgerDB a replacement for Redis or DynamoDB?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
-                    </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        No. LedgerDB optimizes for traceability and replication via Git, not microsecond latency or managed global throughput. Use Redis/Dynamo for ultra-low-latency hot paths; use LedgerDB for reliable, auditable state and long-lived history.
+                        LedgerDB is for applications that need auditability, offline-first writes, and easy replication without running a centralized database service. It stores immutable transactions in Git, so teams can reduce infrastructure overhead while keeping a reliable, verifiable history of state changes.
                     </div>
                 </details>
 
@@ -526,6 +516,16 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>What happens when a push is rejected?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        A push can be rejected when the remote advanced (non-fast-forward). The client fetches the new head and detects divergence. If auto-merge is enabled, it rehydrates both histories, applies a deterministic merge policy, writes a merge transaction, and retries the push. If it cannot merge safely, it surfaces a conflict for manual resolution.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
                         <span>Do you need Raft or consensus to be safe?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
@@ -541,6 +541,16 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
                         Each write produces deterministic transaction bytes, hashes them, and updates the stream HEAD pointer. The commit rewrites only the affected paths, then atomically swaps refs/heads/main. If the ref moved, the write is rejected and retried, guaranteeing the committed tree matches the expected parent state.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>Is LedgerDB a replacement for Redis or DynamoDB?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        Not a drop-in replacement. LedgerDB trades microsecond latency and managed global throughput for auditability, offline-first writes, and decentralized replication. It can be a lower-cost alternative for many workloads that do not need a centralized cloud database.
                     </div>
                 </details>
             </div>
