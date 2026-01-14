@@ -466,21 +466,61 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>Why a Git-native database for client-server apps?</span>
+                        <span>What problem does LedgerDB solve?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        LedgerDB lets you run a durable, auditable database without renting a managed cloud. Every client can be a replica, writes are local-first, and replication uses standard Git push/pull. That means high availability through simple distribution: a laptop, edge node, or on-prem server can operate independently and sync later, with no single point of failure.
+                        LedgerDB is for applications that need auditability, offline-first writes, and easy replication without managing a full database server. It stores immutable transactions in Git, making every clone a valid replica that can sync later.
                     </div>
                 </details>
 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>How does CQRS work here (Git source of truth + SQLite reads)?</span>
+                        <span>Is LedgerDB a replacement for Redis or DynamoDB?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        The Git repo is the write model and source of truth. A SQLite sidecar is a derived read model that can be rebuilt at any time. The indexer tails commits or the state tree and projects documents into tables, enabling fast queries while preserving the immutable ledger for audit and recovery.
+                        No. LedgerDB optimizes for traceability and replication via Git, not microsecond latency or managed global throughput. Use Redis/Dynamo for ultra-low-latency hot paths; use LedgerDB for reliable, auditable state and long-lived history.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>How do reads work (CQRS + SQLite sidecar)?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        Git is the write model and source of truth. The SQLite sidecar is a derived read model that can be rebuilt at any time. The indexer tails commits or the state tree and projects documents into tables for fast queries.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>What is the state index and why is it fast?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        The state tree stores the latest snapshot per document. Indexing in <span class="text-white">state</span> mode diffs the state tree and applies only changed docs (O(changes)), which makes near real-time updates practical.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>What are append vs amend history modes?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        <span class="text-white">Append</span> keeps full history per document (audit trail). <span class="text-white">Amend</span> stores only the latest state per document (compact). Both can use the state index for fast reads.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>Why sharding in the filesystem?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        Sharding spreads files across deep directories so large collections stay fast and avoid OS directory limits. It keeps lookup time stable as the dataset grows.
                     </div>
                 </details>
 
@@ -490,7 +530,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        LedgerDB favors optimistic concurrency with atomic compare-and-set on the Git ref. This avoids a permanent leader and keeps writes possible offline. If you want a single-writer policy, you can choose a coordinator node and require pushes to it. Raft-style consensus can be layered on top if strict linearizability is required, but it is not mandatory for correctness.
+                        LedgerDB uses optimistic concurrency with atomic compare-and-set on the Git ref. You can choose a coordinator for single-writer semantics, or layer consensus if strict linearizability is required, but it is not mandatory for correctness.
                     </div>
                 </details>
 
@@ -500,7 +540,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        Each write produces deterministic transaction bytes, hashes them, and updates the stream HEAD pointer. The commit rewrites only the affected paths, then atomically swaps refs/heads/main. If the ref moved, the write is rejected and retried. This guarantees the committed tree matches the expected parent state.
+                        Each write produces deterministic transaction bytes, hashes them, and updates the stream HEAD pointer. The commit rewrites only the affected paths, then atomically swaps refs/heads/main. If the ref moved, the write is rejected and retried, guaranteeing the committed tree matches the expected parent state.
                     </div>
                 </details>
             </div>
