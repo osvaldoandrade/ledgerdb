@@ -200,31 +200,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                <div class="glass-card p-8 rounded-2xl">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-gem text-ledger-primary"></i> Value Proposition
-                    </h3>
-                    <ul class="space-y-3 text-sm text-gray-300">
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-shield-halved text-ledger-accent mt-1"></i>
-                            <span><strong>Git-native ledger</strong> with tamper-evident history and offline-first sync.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-wave-square text-ledger-pink mt-1"></i>
-                            <span><strong>State tree indexing</strong> applies only changed docs (O(changes)) for fast rebuilds.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-diagram-project text-emerald-400 mt-1"></i>
-                            <span><strong>Sharded layout</strong> keeps filesystem performance stable at scale.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-clock-rotate-left text-ledger-primary mt-1"></i>
-                            <span><strong>History modes</strong>: append (audit) or amend (compact).</span>
-                        </li>
-                    </ul>
-                </div>
-
+            <div class="max-w-4xl mx-auto">
                 <div class="glass-card p-8 rounded-2xl">
                     <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-terminal text-ledger-accent"></i> CLI Quick Start
@@ -376,9 +352,9 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 <!-- Steps Generation -->
                 <!-- 1. Read Ref -->
                 <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-ledger-primary transition-colors">1</div>
-                    <i class="fa-solid fa-code-branch text-ledger-primary text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Read Main Ref</h4>
+                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">1</div>
+                    <i class="fa-solid fa-code-branch text-gray-400 text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Read Main Ref</h4>
                     <p class="step-desc">Load refs/heads/main</p>
                 </div>
 
@@ -415,18 +391,18 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 </div>
 
                 <!-- 6. Write Blobs (Highlight) -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg border-ledger-accent/50">
-                    <div class="w-8 h-8 rounded-full bg-ledger-accent text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg shadow-[0_0_10px_rgba(6,182,212,0.5)]">6</div>
-                    <i class="fa-solid fa-file-export text-ledger-accent text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Write Blobs</h4>
+                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
+                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">6</div>
+                    <i class="fa-solid fa-file-export text-gray-400 text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Write Blobs</h4>
                     <p class="step-desc">Tx + HEAD + state</p>
                 </div>
 
                 <!-- 7. Build Commit -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg border-ledger-pink/50">
-                    <div class="w-8 h-8 rounded-full bg-ledger-pink text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg shadow-[0_0_10px_rgba(236,72,153,0.5)]">7</div>
-                    <i class="fa-solid fa-diagram-project text-ledger-pink text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-white">Build Commit</h4>
+                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
+                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">7</div>
+                    <i class="fa-solid fa-diagram-project text-gray-400 text-xl mb-1"></i>
+                    <h4 class="font-bold text-xs uppercase text-gray-300">Build Commit</h4>
                     <p class="step-desc">Update tree + commit</p>
                 </div>
 
