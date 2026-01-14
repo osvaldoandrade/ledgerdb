@@ -466,31 +466,41 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>Why build a database on Git?</span>
+                        <span>Why a Git-native database for client-server apps?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        Git provides out-of-the-box cryptographic verification (Merkle trees), distributed replication, and audit trails. By using Git as the storage engine, LedgerDB inherits these properties natively without complex consensus algorithms.
+                        LedgerDB lets you run a durable, auditable database without renting a managed cloud. Every client can be a replica, writes are local-first, and replication uses standard Git push/pull. That means high availability through simple distribution: a laptop, edge node, or on-prem server can operate independently and sync later, with no single point of failure.
                     </div>
                 </details>
 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>How does concurrency work without a central server?</span>
+                        <span>How does CQRS work here (Git source of truth + SQLite reads)?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        LedgerDB uses optimistic concurrency control on a per-document basis. Writers check the `HEAD` pointer before writing. If `HEAD` has moved since the read, the write fails and must be retried.
+                        The Git repo is the write model and source of truth. A SQLite sidecar is a derived read model that can be rebuilt at any time. The indexer tails commits or the state tree and projects documents into tables, enabling fast queries while preserving the immutable ledger for audit and recovery.
                     </div>
                 </details>
 
                 <details class="glass-card rounded-xl group">
                     <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
-                        <span>Is it SQL compatible?</span>
+                        <span>Do you need Raft or consensus to be safe?</span>
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        Yes. The SQLite sidecar (LedgerSQL) projects JSON documents into a local database, enabling SQL queries and joins while the Git ledger remains the source of truth.
+                        LedgerDB favors optimistic concurrency with atomic compare-and-set on the Git ref. This avoids a permanent leader and keeps writes possible offline. If you want a single-writer policy, you can choose a coordinator node and require pushes to it. Raft-style consensus can be layered on top if strict linearizability is required, but it is not mandatory for correctness.
+                    </div>
+                </details>
+
+                <details class="glass-card rounded-xl group">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                        <span>How is the tree validated during commit?</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                        Each write produces deterministic transaction bytes, hashes them, and updates the stream HEAD pointer. The commit rewrites only the affected paths, then atomically swaps refs/heads/main. If the ref moved, the write is rejected and retried. This guarantees the committed tree matches the expected parent state.
                     </div>
                 </details>
             </div>
