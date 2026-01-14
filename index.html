@@ -462,37 +462,18 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Complexity Chart -->
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Throughput Chart -->
                 <div class="glass-card p-6 rounded-2xl flex flex-col">
                     <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-ledger-accent"></i> Operation Cost
+                        <i class="fa-solid fa-chart-simple text-ledger-accent"></i> Measured Write Throughput
                     </h3>
                     <p class="text-xs text-gray-400 mb-4 h-12">
-                        Writes are strictly constant time (O(S)) due to atomic appends. Reads involve traversing the delta chain, making them linearly more expensive until a snapshot resets the cost.
+                        CLI benchmarks from local runs. Each bar shows average writes/sec for a specific history + index mode.
                     </p>
                     <div class="chart-container flex-grow">
                         <canvas id="complexityChart"></canvas>
                     </div>
-                    <div class="mt-4 flex gap-4 text-xs justify-center">
-                        <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-ledger-accent"></span> Write (Fast)</div>
-                        <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-ledger-primary"></span> Read Head</div>
-                        <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-ledger-pink"></span> Read Delta</div>
-                    </div>
-                </div>
-
-                <!-- Delta Chart -->
-                <div class="glass-card p-6 rounded-2xl flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-wave-square text-ledger-pink"></i> Delta Chain Reset
-                    </h3>
-                    <p class="text-xs text-gray-400 mb-4 h-12">
-                        To prevent infinite read degradation, LedgerDB enforces a full document snapshot every 32 transactions. This creates a "sawtooth" performance profile that guarantees an upper bound on read latency.
-                    </p>
-                    <div class="chart-container flex-grow">
-                        <canvas id="deltaChart"></canvas>
-                    </div>
-                    <p class="text-xs text-center text-gray-500 mt-4">Read cost resets every 32 transactions (Snapshot)</p>
                 </div>
             </div>
 
@@ -634,67 +615,61 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
             reveals.forEach(el => observer.observe(el));
         });
 
-        // --- 3. Complexity Chart ---
+        // --- 3. Throughput Chart ---
+        const valueLabelPlugin = {
+            id: 'valueLabel',
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart;
+                ctx.save();
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (meta.hidden) {
+                        return;
+                    }
+                    meta.data.forEach((element, index) => {
+                        const value = dataset.data[index];
+                        const label = Number(value).toFixed(2);
+                        ctx.fillStyle = '#F8FAFC';
+                        ctx.font = '12px Inter, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(label, element.x + 8, element.y);
+                    });
+                });
+                ctx.restore();
+            }
+        };
+        Chart.register(valueLabelPlugin);
+
         const ctxComp = document.getElementById('complexityChart').getContext('2d');
         new Chart(ctxComp, {
             type: 'bar',
             data: {
-                labels: ['Write (Put)', 'Read (Head)', 'Read (Delta)', 'Range Scan'],
+                labels: ['Append + State (1s)', 'Amend + State (1s)', 'State watch (250ms)'],
                 datasets: [{
-                    label: 'Cost',
-                    data: [10, 5, 45, 60],
-                    backgroundColor: [colors.accent, colors.primary, colors.pink, '#475569'],
+                    label: 'Avg writes/sec',
+                    data: [56.72, 65.79, 65.26],
+                    backgroundColor: [colors.accent, colors.primary, colors.pink],
                     borderRadius: 6,
-                    barThickness: 40
+                    barThickness: 22
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { beginAtZero: true, display: false }, 
-                    x: { grid: { display: false } } 
-                }
-            }
-        });
-
-        // --- 4. Delta Chart ---
-        const ctxDelta = document.getElementById('deltaChart').getContext('2d');
-        const labelsDelta = Array.from({length: 64}, (_, i) => i + 1);
-        const dataDelta = labelsDelta.map(i => (i % 32 === 0) ? 10 : 10 + (i % 32) * 2);
-
-        new Chart(ctxDelta, {
-            type: 'line',
-            data: {
-                labels: labelsDelta,
-                datasets: [{
-                    label: 'Read Cost',
-                    data: dataDelta,
-                    borderColor: colors.pink,
-                    backgroundColor: (context) => {
-                        const ctx = context.chart.ctx;
-                        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                        gradient.addColorStop(0, 'rgba(236, 72, 153, 0.2)');
-                        gradient.addColorStop(1, 'rgba(236, 72, 153, 0)');
-                        return gradient;
-                    },
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { display: false }, 
-                    x: { display: false } 
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.parsed.x} writes/sec`
+                        }
+                    }
                 },
-                interaction: { intersect: false, mode: 'index' }
+                scales: { 
+                    y: { grid: { display: false } },
+                    x: { beginAtZero: true, grid: { color: 'rgba(51,65,85,0.4)' } }
+                }
             }
         });
     </script>
