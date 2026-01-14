@@ -119,9 +119,6 @@
     <nav class="fixed top-0 w-full z-50 bg-ledger-bg/80 backdrop-blur-md border-b border-ledger-border transition-all duration-300" id="navbar">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-gradient-to-br from-ledger-primary to-ledger-accent flex items-center justify-center text-white font-bold font-display shadow-lg shadow-ledger-primary/20">
-                    L
-                </div>
                 <span class="font-display font-bold text-xl tracking-tight text-white">LedgerDB</span>
             </div>
             
@@ -257,8 +254,9 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 <span class="text-ledger-primary font-mono text-sm tracking-widest uppercase">System Design</span>
                 <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">The Database is the Filesystem</h2>
                 <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
-                    LedgerDB maps logical concepts directly to a directory structure. 
-                    Simple to inspect, backup, and audit using standard tools.
+                    LedgerDB maps logical concepts directly to a directory structure.
+                    History lives in <span class="text-white">documents/</span>, current state in <span class="text-white">state/</span>,
+                    and schemas in <span class="text-white">collections/</span>. The SQLite sidecar sits next to the repo for fast queries.
                 </p>
             </div>
 
@@ -270,9 +268,14 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                 <div class="relative z-10 font-mono text-sm md:text-base">
                     <!-- Root -->
                     <div class="flex flex-col items-center">
-                        <div class="bg-ledger-bg border border-ledger-border px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 relative z-10">
+                <div class="bg-ledger-bg border border-ledger-border px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 relative z-10">
                             <i class="fa-solid fa-server text-ledger-primary"></i>
-                            <span class="font-bold text-white">db-root/</span>
+                            <div>
+                                <div class="font-bold text-white">db-root/</div>
+                                <div class="text-[10px] text-gray-400 flex items-center gap-2">
+                                    <i class="fa-regular fa-file-lines"></i> db.yaml
+                                </div>
+                            </div>
                         </div>
                         <div class="tree-line-v h-8"></div>
                     </div>
@@ -299,7 +302,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                                 </div>
                                 <ul class="space-y-2 text-xs text-gray-400 pl-4">
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-file-code"></i> schema.json</li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-gear"></i> config.yaml</li>
+                                    <li class="flex items-center gap-2"><i class="fa-solid fa-list-check"></i> indexes.json</li>
                                 </ul>
                             </div>
                         </div>
@@ -309,7 +312,10 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                             <div class="glass-card w-full p-4 rounded-xl border-l-4 border-l-ledger-pink shadow-[0_0_30px_-10px_rgba(236,72,153,0.3)]">
                                 <div class="flex items-center justify-between mb-3 text-ledger-pink font-bold">
                                     <div class="flex items-center gap-2"><i class="fa-regular fa-folder-open"></i> documents/</div>
-                                    <span class="text-[10px] bg-ledger-pink text-white px-2 rounded">HOT</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] border border-ledger-pink/60 text-ledger-pink px-2 rounded">SHARDED</span>
+                                        <span class="text-[10px] bg-ledger-pink text-white px-2 rounded">HISTORY</span>
+                                    </div>
                                 </div>
                                 <div class="bg-white/5 rounded p-3 border border-white/5">
                                     <div class="text-xs text-gray-300 mb-2">DOC_&lt;hash&gt;/</div>
@@ -318,23 +324,33 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                                             <span><i class="fa-solid fa-location-arrow text-ledger-pink mr-1"></i> HEAD</span>
                                             <span class="text-[9px] text-gray-500 group-hover:text-ledger-pink transition-colors">POINTER</span>
                                         </li>
-                                        <li class="flex items-center gap-2 text-ledger-primary"><i class="fa-regular fa-file-lines"></i> tx_02.yaml</li>
-                                        <li class="flex items-center gap-2 text-gray-600"><i class="fa-regular fa-file-lines"></i> tx_01.yaml</li>
+                                        <li class="flex items-center gap-2 text-ledger-primary"><i class="fa-regular fa-file-lines"></i> tx/2025..._put.txpb</li>
+                                        <li class="flex items-center gap-2 text-gray-600"><i class="fa-regular fa-file-lines"></i> tx/2025..._patch.txpb</li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Col 3: Indexes -->
+                        <!-- Col 3: State -->
                         <div class="flex flex-col items-center">
                             <div class="glass-card w-full p-4 rounded-xl border-l-4 border-l-emerald-500 opacity-80 hover:opacity-100 transition-opacity">
-                                <div class="flex items-center gap-2 mb-3 text-emerald-500 font-bold">
-                                    <i class="fa-regular fa-folder-open"></i> indexes/
+                                <div class="flex items-center justify-between mb-3 text-emerald-500 font-bold">
+                                    <div class="flex items-center gap-2"><i class="fa-regular fa-folder-open"></i> state/</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] border border-emerald-400/60 text-emerald-300 px-2 rounded">SHARDED</span>
+                                        <span class="text-[10px] bg-emerald-500 text-white px-2 rounded">LATEST</span>
+                                    </div>
                                 </div>
-                                <ul class="space-y-2 text-xs text-gray-400 pl-4">
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-tree"></i> btree/ <span class="text-[9px] border border-gray-600 px-1 rounded">SORT</span></li>
-                                    <li class="flex items-center gap-2"><i class="fa-solid fa-list"></i> hash/ <span class="text-[9px] border border-gray-600 px-1 rounded">FIND</span></li>
-                                </ul>
+                                <div class="bg-white/5 rounded p-3 border border-white/5">
+                                    <div class="text-xs text-gray-300 mb-2">DOC_&lt;hash&gt;/</div>
+                                    <ul class="space-y-2 text-xs pl-2 border-l border-ledger-border ml-1">
+                                        <li class="flex items-center justify-between text-white font-bold">
+                                            <span><i class="fa-solid fa-location-arrow text-emerald-400 mr-1"></i> HEAD</span>
+                                            <span class="text-[9px] text-gray-500">POINTER</span>
+                                        </li>
+                                        <li class="flex items-center gap-2 text-emerald-300"><i class="fa-regular fa-file-lines"></i> tx/current.txpb</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
@@ -566,7 +582,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
                         <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
                     </summary>
                     <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
-                        Yes. LedgerSQL acts as a derived layer that projects the JSON documents into a local SQLite instance. This allows you to run complex SQL queries and joins on your data while keeping the Git ledger as the single source of truth.
+                        Yes. The SQLite sidecar (LedgerSQL) projects JSON documents into a local database, enabling SQL queries and joins while the Git ledger remains the source of truth.
                     </div>
                 </details>
             </div>
@@ -577,9 +593,6 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
     <!-- Footer -->
     <footer class="bg-[#020408] border-t border-ledger-border py-12">
         <div class="container mx-auto px-4 text-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-ledger-primary to-ledger-accent rounded-xl flex items-center justify-center text-white font-bold text-xl mx-auto mb-6 shadow-lg shadow-ledger-primary/20">
-                L
-            </div>
             <h4 class="text-2xl font-display font-bold text-white mb-2">LedgerDB</h4>
             <p class="text-gray-500 mb-8 max-w-sm mx-auto">The open-source, git-native database for high-integrity systems.</p>
             
@@ -588,7 +601,7 @@ ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-c
             </a>
 
             <div class="mt-12 pt-8 border-t border-white/5 text-xs text-gray-700">
-                &copy; 2026 Code Company. Released under MIT License.
+                &copy; 2026 LedgerDB. Released under MIT License.
             </div>
         </div>
     </footer>
