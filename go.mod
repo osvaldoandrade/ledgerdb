@@ -1,4 +1,4 @@
-module github.com/codecompany/ledgerdb
+module github.com/osvaldoandrade/ledgerdb
 
 go 1.25
 

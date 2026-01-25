@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type Canonicalizer interface {

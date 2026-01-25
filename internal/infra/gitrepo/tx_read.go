@@ -8,8 +8,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/codecompany/ledgerdb/internal/app/doc"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"

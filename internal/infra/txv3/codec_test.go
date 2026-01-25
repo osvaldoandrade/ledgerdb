@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 func TestEncodeDecodeRoundTrip(t *testing.T) {

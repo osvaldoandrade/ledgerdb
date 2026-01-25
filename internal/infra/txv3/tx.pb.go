@@ -239,7 +239,7 @@ const file_internal_infra_txv3_tx_proto_rawDesc = "" +
 	"\n" +
 	"\x06DELETE\x10\x03\x12\t\n" +
 	"\x05MERGE\x10\x04B\t\n" +
-	"\apayloadB:Z8github.com/codecompany/ledgerdb/internal/infra/txv3;txv3b\x06proto3"
+	"\apayloadB=Z;github.com/osvaldoandrade/ledgerdb/internal/infra/txv3;txv3b\x06proto3"
 
 var (
 	file_internal_infra_txv3_tx_proto_rawDescOnce sync.Once

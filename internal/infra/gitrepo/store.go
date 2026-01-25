@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 	"github.com/go-git/go-git/v5"
 )
 

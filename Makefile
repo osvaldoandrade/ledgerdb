@@ -16,7 +16,15 @@ CORE_PKG := ./pkg/ledgerdb
 CLI_PKG := ./cmd/ledgerdb
 
 LINK_SHARED ?= 0
-PREFIX ?= /usr/local
+ifeq ($(GOOS),darwin)
+  ifeq ($(GOARCH),arm64)
+    PREFIX ?= /opt/homebrew
+  else
+    PREFIX ?= /usr/local
+  endif
+else
+  PREFIX ?= /usr/local
+endif
 BINDIR ?= $(PREFIX)/bin
 LIBDIR ?= $(PREFIX)/lib
 INSTALL ?= install
@@ -28,18 +36,23 @@ build-core: | build-dir
 	$(GO) build -buildmode=archive -o $(CORE_LIB) $(CORE_PKG)
 
 build-core-shared: | build-dir
-	@if [ "$(GOOS)" = "darwin" ] && [ "$(GOARCH)" = "arm64" ]; then \
+	@set -e; \
+	if [ "$(GOOS)" = "darwin" ] && [ "$(GOARCH)" = "arm64" ]; then \
 		echo "buildmode=shared not supported on $(GOOS)/$(GOARCH); falling back to archive"; \
 		$(MAKE) build-core; \
 	else \
-		$(GO) build -buildmode=shared $(CORE_PKG); \
-		if [ -f libledgerdb.dylib ]; then \
-			mv libledgerdb.dylib $(CORE_DYLIB); \
-		elif [ -f libledgerdb.so ]; then \
-			mv libledgerdb.so $(CORE_SO); \
+		if $(GO) build -buildmode=shared $(CORE_PKG); then \
+			if [ -f libledgerdb.dylib ]; then \
+				mv libledgerdb.dylib $(CORE_DYLIB); \
+			elif [ -f libledgerdb.so ]; then \
+				mv libledgerdb.so $(CORE_SO); \
+			else \
+				echo "shared library not produced"; \
+				exit 1; \
+			fi; \
 		else \
-			echo "shared library not produced"; \
-			exit 1; \
+			echo "buildmode=shared failed; falling back to archive"; \
+			$(MAKE) build-core; \
 		fi; \
 	fi
 
@@ -61,7 +74,20 @@ install: build-core-shared build-cli
 		exit 1; \
 	fi; \
 	sudo_cmd=""; \
-	if [ ! -w "$(BINDIR)" ] || [ ! -w "$(LIBDIR)" ]; then \
+	needs_sudo=0; \
+	for dir in "$(BINDIR)" "$(LIBDIR)"; do \
+		if [ -d "$$dir" ]; then \
+			[ -w "$$dir" ] || needs_sudo=1; \
+		else \
+			parent=$$(dirname "$$dir"); \
+			[ -w "$$parent" ] || needs_sudo=1; \
+		fi; \
+	done; \
+	if [ "$$needs_sudo" -eq 1 ]; then \
+		if [ -z "$(SUDO)" ]; then \
+			echo "error: install needs elevated privileges; set SUDO=sudo or use writable PREFIX"; \
+			exit 1; \
+		fi; \
 		sudo_cmd="$(SUDO)"; \
 	fi; \
 	$$sudo_cmd $(INSTALL) -d "$(BINDIR)" "$(LIBDIR)"; \

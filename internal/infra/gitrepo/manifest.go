@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 func renderManifest(manifest domain.Manifest) string {

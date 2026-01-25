@@ -3,8 +3,8 @@ package integrity
 import (
 	"context"
 
-	"github.com/codecompany/ledgerdb/internal/app/doc"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type StreamLister interface {

@@ -1,6 +1,6 @@
 package doc
 
-import "github.com/codecompany/ledgerdb/internal/domain"
+import "github.com/osvaldoandrade/ledgerdb/internal/domain"
 
 type PutResult struct {
 	CommitHash string

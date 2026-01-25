@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ledgerdb.v3;
 
-option go_package = "github.com/codecompany/ledgerdb/internal/infra/txv3;txv3";
+option go_package = "github.com/osvaldoandrade/ledgerdb/internal/infra/txv3;txv3";
 
 message Transaction {
   string tx_id = 1;

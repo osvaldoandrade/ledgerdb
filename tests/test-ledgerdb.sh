@@ -443,7 +443,7 @@ if [ "$REMOTE_MODE" = "github" ]; then
     echo "Go-git sync disabled; push will run via ledgerdb."
   fi
 else
-  echo "Tip: set GITHUB_REMOTE_URL=https://github.com/codecompany/demo-ledgerdb to test GitHub sync."
+  echo "Tip: set GITHUB_REMOTE_URL=https://github.com/osvaldoandrade/demo-ledgerdb to test GitHub sync."
 fi
 echo "==> Load settings: tasks=$TASK_COUNT updates=$UPDATE_ROUNDS every=$UPDATE_EVERY deletes=$DELETE_EVERY index_wait=${INDEX_WAIT_MAX}s mode=${EFFECTIVE_WAIT_MODE} wait=${INDEX_WAIT_MODE} batch=${INDEX_BATCH_COMMITS} fast=${INDEX_FAST} watch=${INDEX_WATCH_INTERVAL} source=${INDEX_MODE} layout=${STREAM_LAYOUT} history=${HISTORY_MODE}"
 if [ "$LEDGERDB_OUT" = "/dev/null" ]; then

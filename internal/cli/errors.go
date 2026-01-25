@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io"
 
-	collectionapp "github.com/codecompany/ledgerdb/internal/app/collection"
-	docapp "github.com/codecompany/ledgerdb/internal/app/doc"
-	indexapp "github.com/codecompany/ledgerdb/internal/app/index"
-	inspectapp "github.com/codecompany/ledgerdb/internal/app/inspect"
-	maintenanceapp "github.com/codecompany/ledgerdb/internal/app/maintenance"
-	"github.com/codecompany/ledgerdb/internal/app/paths"
-	repoapp "github.com/codecompany/ledgerdb/internal/app/repo"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	collectionapp "github.com/osvaldoandrade/ledgerdb/internal/app/collection"
+	docapp "github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
+	inspectapp "github.com/osvaldoandrade/ledgerdb/internal/app/inspect"
+	maintenanceapp "github.com/osvaldoandrade/ledgerdb/internal/app/maintenance"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
+	repoapp "github.com/osvaldoandrade/ledgerdb/internal/app/repo"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type ErrorKind string

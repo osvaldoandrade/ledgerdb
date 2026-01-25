@@ -1,0 +1,50 @@
+{
+  "name": "@osvaldoandrade/ledgerdb",
+  "version": "0.1.0",
+  "description": "LedgerDB TypeScript SDK (CLI bridge).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/osvaldoandrade/ledgerdb.git",
+    "directory": "packages/sdk-typescript"
+  },
+  "homepage": "https://github.com/osvaldoandrade/ledgerdb",
+  "bugs": {
+    "url": "https://github.com/osvaldoandrade/ledgerdb/issues"
+  },
+  "keywords": [
+    "ledgerdb",
+    "database",
+    "git",
+    "sqlite",
+    "sdk"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ledgerdb": "bin/ledgerdb.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.5"
+  }
+}

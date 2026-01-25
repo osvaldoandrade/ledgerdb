@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type revertStore struct {

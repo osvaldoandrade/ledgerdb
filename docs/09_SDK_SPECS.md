@@ -4,6 +4,12 @@
 
 In the LedgerDB architecture, the "Database Server" is effectively a passive file server (the Git Repository). All database intelligence—concurrency control, schema validation, transaction serialization, and index management—resides in the **Client SDK**. This document specifies the requirements for implementing a compliant LedgerDB SDK in any target language (Go, Node.js, Rust, Python), ensuring uniform behavior across ecosystems.
 
+## 1.1 Status (v0)
+
+The Go SDK uses core services directly (no CLI dependency). Rust and TypeScript will use a CLI bridge initially to avoid FFI complexity. The smart-client design below remains the long-term target.
+
+TypeScript package: `@osvaldoandrade/ledgerdb` (CLI bridge).
+
 ## 2. The "Smart Client" Architecture
 
 Traditional DB drivers are thin wrappers around a TCP socket. The LedgerDB SDK is a **Fat Client** that interacts directly with the local or remote Git plumbing.

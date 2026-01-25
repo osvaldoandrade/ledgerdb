@@ -198,6 +198,50 @@ make install
 * **Override paths:** `make install PREFIX=/usr/local`
 * **Shared libs:** `make build-core-shared` (falls back to archive if unsupported).
 
+### 11.3 Go SDK (Core)
+
+The Go SDK (`github.com/osvaldoandrade/ledgerdb/pkg/ledgerdbsdk`) uses the core services directly (no CLI dependency). It configures the SQLite watch and exposes SQL + key-value reads.
+
+```go
+cfg := ledgerdbsdk.DefaultConfig("/path/to/ledgerdb.git")
+cfg.AutoWatch = true
+
+ctx := context.Background()
+client, err := ledgerdbsdk.Open(ctx, cfg)
+if err != nil {
+  panic(err)
+}
+defer client.Close()
+
+doc, _ := client.Get(ctx, "tasks", "task_0001") // key-value (ledger)
+rows, _ := client.Query(ctx, "SELECT doc_id, payload FROM collection_tasks WHERE status = ?", "done")
+_ = rows
+```
+
+### 11.4 TypeScript SDK (CLI Bridge)
+
+```bash
+npm config set @osvaldoandrade:registry https://npm.pkg.github.com
+
+npm install @osvaldoandrade/ledgerdb
+```
+
+```ts
+import { LedgerDBClient } from "@osvaldoandrade/ledgerdb";
+
+const client = new LedgerDBClient({
+  repoPath: "/path/to/ledgerdb.git",
+});
+
+await client.put("tasks", "task_0001", { title: "Ship v1" });
+const doc = await client.get("tasks", "task_0001");
+console.log(doc);
+```
+
+* **Binary override:** set `LEDGERDB_BIN` to a preinstalled binary.
+* **Skip download:** set `LEDGERDB_SKIP_DOWNLOAD=1`.
+
+
 ---
 
 ## 12. Client SDK Specifications

@@ -1,6 +1,6 @@
 package inspect
 
-import "github.com/codecompany/ledgerdb/internal/domain"
+import "github.com/osvaldoandrade/ledgerdb/internal/domain"
 
 type BlobResult struct {
 	ObjectHash string

@@ -8,10 +8,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/codecompany/ledgerdb/internal/app/doc"
-	"github.com/codecompany/ledgerdb/internal/domain"
-	"github.com/codecompany/ledgerdb/internal/infra/hash"
-	"github.com/codecompany/ledgerdb/internal/infra/txv3"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/infra/hash"
+	"github.com/osvaldoandrade/ledgerdb/internal/infra/txv3"
 )
 
 func TestPutTxAndReadBack(t *testing.T) {

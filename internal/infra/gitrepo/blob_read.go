@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	inspectapp "github.com/codecompany/ledgerdb/internal/app/inspect"
+	inspectapp "github.com/osvaldoandrade/ledgerdb/internal/app/inspect"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"

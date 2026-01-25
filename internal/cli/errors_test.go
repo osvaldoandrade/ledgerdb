@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	docapp "github.com/codecompany/ledgerdb/internal/app/doc"
-	indexapp "github.com/codecompany/ledgerdb/internal/app/index"
-	maintenanceapp "github.com/codecompany/ledgerdb/internal/app/maintenance"
-	"github.com/codecompany/ledgerdb/internal/app/paths"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	docapp "github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
+	maintenanceapp "github.com/osvaldoandrade/ledgerdb/internal/app/maintenance"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 func TestNormalizeError(t *testing.T) {

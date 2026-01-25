@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/codecompany/ledgerdb/pkg/ledgerdb"
+	"github.com/osvaldoandrade/ledgerdb/pkg/ledgerdb"
 )
 
 func main() {

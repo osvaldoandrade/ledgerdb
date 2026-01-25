@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	indexapp "github.com/codecompany/ledgerdb/internal/app/index"
+	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
 	_ "modernc.org/sqlite"
 )
 
@@ -63,6 +63,13 @@ func (s *Store) Close() error {
 		return nil
 	}
 	return s.db.Close()
+}
+
+func (s *Store) DB() *sql.DB {
+	if s == nil {
+		return nil
+	}
+	return s.db
 }
 
 func (s *Store) GetState(ctx context.Context) (indexapp.State, error) {

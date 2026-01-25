@@ -3,7 +3,7 @@ package txv3
 import (
 	"fmt"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 	"google.golang.org/protobuf/proto"
 )
 

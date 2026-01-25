@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/codecompany/ledgerdb/internal/app/paths"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type InitService struct {

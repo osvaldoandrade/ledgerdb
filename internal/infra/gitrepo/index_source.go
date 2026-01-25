@@ -8,8 +8,8 @@ import (
 	"path"
 	"strings"
 
-	indexapp "github.com/codecompany/ledgerdb/internal/app/index"
-	"github.com/codecompany/ledgerdb/internal/domain"
+	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"

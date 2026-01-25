@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/codecompany/ledgerdb/internal/domain"
-	"github.com/codecompany/ledgerdb/internal/infra/gitrepo"
-	"github.com/codecompany/ledgerdb/internal/platform"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
+	"github.com/osvaldoandrade/ledgerdb/internal/infra/gitrepo"
+	"github.com/osvaldoandrade/ledgerdb/internal/platform"
 	"github.com/spf13/cobra"
 )
 

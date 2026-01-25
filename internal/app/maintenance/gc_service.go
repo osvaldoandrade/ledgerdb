@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/codecompany/ledgerdb/internal/app/paths"
+	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
 )
 
 type GCService struct {
