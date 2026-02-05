@@ -159,22 +159,29 @@
             </div>
             
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-ledger-muted">
-                <a href="#get-started" class="hover:text-white transition-colors">Get Started</a>
+                <!-- Links centralizados -->
+                <a href="#overview" class="hover:text-white transition-colors">Overview</a>
                 <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
-                <a href="#workflow" class="hover:text-white transition-colors">Write Flow</a>
                 <a href="#performance" class="hover:text-white transition-colors">Performance</a>
                 <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
             </div>
 
-            <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="group relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-ledger-border rounded-full shadow-md hover:bg-white/5">
-                <i class="fa-brands fa-github text-lg mr-2"></i>
-                <span>GitHub</span>
-            </a>
+            <!-- Botões de Ação (Get Started + GitHub) -->
+            <div class="flex items-center gap-3">
+                <a href="#get-started" class="hidden sm:inline-flex items-center justify-center px-5 py-2 font-medium text-white transition duration-300 ease-out border border-ledger-primary bg-ledger-primary/10 hover:bg-ledger-primary/20 rounded-full shadow-md">
+                    <span>Get Started</span>
+                </a>
+
+                <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="group relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-ledger-border rounded-full shadow-md hover:bg-white/5">
+                    <i class="fa-brands fa-github text-lg mr-2"></i>
+                    <span>GitHub</span>
+                </a>
+            </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="relative pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden">
+    <header class="relative pt-32 lg:pt-48 pb-12 overflow-hidden">
         <!-- Ambient Glow -->
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-ledger-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -188,43 +195,26 @@
                 Immutable transaction files inside a Git repository. <br class="hidden md:block" />
                 No global locks. Deterministic concurrency. 100% Audit trail.
             </p>
-
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 reveal" style="transition-delay: 300ms;">
-                <a href="#get-started" class="px-8 py-3.5 rounded-xl bg-white text-ledger-bg font-bold hover:bg-gray-200 transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                    Get Started
-                </a>
-                <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="px-8 py-3.5 rounded-xl border border-ledger-border text-gray-300 hover:text-white hover:border-white transition-all duration-200">
-                    <i class="fa-brands fa-github mr-2"></i> View Source
-                </a>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 reveal" style="transition-delay: 400ms;">
-                <div class="glass-card p-4 rounded-xl text-center">
-                    <div class="text-ledger-primary text-2xl mb-2"><i class="fa-solid fa-code-branch"></i></div>
-                    <div class="font-bold text-white">Git-Native</div>
-                    <div class="text-xs text-gray-400">Replication Engine</div>
-                </div>
-                <div class="glass-card p-4 rounded-xl text-center">
-                    <div class="text-ledger-accent text-2xl mb-2"><i class="fa-solid fa-file-contract"></i></div>
-                    <div class="font-bold text-white">JSON Schema</div>
-                    <div class="text-xs text-gray-400">Strict Validation</div>
-                </div>
-                <div class="glass-card p-4 rounded-xl text-center">
-                    <div class="text-ledger-pink text-2xl mb-2"><i class="fa-solid fa-database"></i></div>
-                    <div class="font-bold text-white">SQLite Sidecar</div>
-                    <div class="text-xs text-gray-400">Instant Queries</div>
-                </div>
-                <div class="glass-card p-4 rounded-xl text-center">
-                    <div class="text-emerald-400 text-2xl mb-2"><i class="fa-solid fa-fingerprint"></i></div>
-                    <div class="font-bold text-white">Verifiable</div>
-                    <div class="text-xs text-gray-400">Hash Chaining</div>
-                </div>
-            </div>
         </div>
     </header>
 
     <main class="space-y-32 pb-32">
+
+        <!-- SECTION: OVERVIEW VIDEO -->
+        <section id="overview" class="container mx-auto px-4 reveal">
+            <div class="max-w-4xl mx-auto glass-card p-2 rounded-2xl overflow-hidden relative group">
+                <!-- Video Container (16:9 Aspect Ratio) -->
+                <div class="relative w-full pb-[56.25%] h-0 bg-black/50 rounded-xl">
+                    <iframe 
+                        src="https://drive.google.com/file/d/19FoRjdSorkD1QhizksgO8V3ahZde0H_4/preview" 
+                        class="absolute top-0 left-0 w-full h-full rounded-xl"
+                        allow="autoplay"
+                        allowfullscreen
+                        frameborder="0">
+                    </iframe>
+                </div>
+            </div>
+        </section>
 
         <!-- SECTION 0: GET STARTED -->
         <section id="get-started" class="container mx-auto px-4 reveal">
