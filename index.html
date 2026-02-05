@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LedgerDB | Git-Native Document Database</title>
     <meta name="description" content="LedgerDB is a git-native document database for auditability, offline-first writes, and verifiable state history.">
-    <meta name="theme-color" content="#0F172A">
+    <meta name="theme-color" content="#050505">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
@@ -13,18 +13,17 @@
     <meta property="og:description" content="Git-native document database for auditability, offline-first writes, and verifiable state history.">
     <meta property="og:url" content="https://github.com/osvaldoandrade/ledgerdb">
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="LedgerDB | Git-Native Document Database">
-    <meta name="twitter:description" content="Git-native document database for auditability, offline-first writes, and verifiable state history.">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -33,27 +32,23 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        ledger: {
-                            bg: '#0F172A',      // Slate 900 (Base)
-                            card: '#1E293B',    // Slate 800 (Cards)
-                            border: '#334155',  // Slate 700 (Borders)
-                            primary: '#6366F1', // Indigo 500
-                            accent: '#06B6D4',  // Cyan 500
-                            pink: '#EC4899',    // Pink 500
-                            text: '#F8FAFC',    // Slate 50
-                            muted: '#94A3B8'    // Slate 400
+                        brand: {
+                            bg: '#050505',       // Pitch black
+                            surface: '#0A0A0A',  // Very dark grey
+                            border: '#333333',   // Subtle border
+                            primary: '#8B5CF6',  // Violet 500 (Base identity)
+                            secondary: '#F59E0B',// Amber 500
+                            success: '#10B981',  // Emerald 500
+                            error: '#EF4444',    // Red 500
+                            text: '#E5E5E5',     // Light grey
+                            muted: '#737373'     // Darker grey
                         }
                     },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                     }
                 }
             }
@@ -61,24 +56,27 @@
     </script>
     <style>
         body {
-            background-color: #0F172A;
-            color: #F8FAFC;
-            overflow-x: hidden;
+            background-color: #050505;
+            color: #E5E5E5;
         }
         
-        /* Glassmorphism Card Style */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        /* Glass/Industrial Panel */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #333;
+            transition: all 0.3s ease;
         }
-        .glass-card:hover {
-            border-color: rgba(99, 102, 241, 0.5);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+        
+        .glass-panel:hover {
+            border-color: #8B5CF6;
+            box-shadow: 0 4px 20px -5px rgba(139, 92, 246, 0.15);
+        }
+
+        /* Glow Text */
+        .glow-text {
+            text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
         }
 
         /* Chart Containers */
@@ -101,80 +99,55 @@
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0F172A; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
 
         /* Tree Diagram Lines */
-        .tree-line-v { width: 2px; background-color: #334155; margin: 0 auto; }
-        .tree-line-h { height: 2px; background-color: #334155; }
+        .tree-line-v { width: 1px; background-color: #333; margin: 0 auto; }
+        .tree-line-h { height: 1px; background-color: #333; }
 
-        /* Step Hover Description */
-        .step-desc {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            font-size: 0.7rem;
-            color: #94A3B8;
-            margin-top: 0;
+        /* FAQ Details */
+        details > summary {
+            list-style: none;
         }
-        .glass-card:hover .step-desc {
-            max-height: 50px;
-            opacity: 1;
-            margin-top: 0.5rem;
-        }
-
-        .tab-btn {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid #334155;
-            color: #94A3B8;
-            padding: 0.4rem 0.9rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active {
-            background: #F8FAFC;
-            color: #0F172A;
-            border-color: transparent;
-            box-shadow: 0 8px 20px -12px rgba(248, 250, 252, 0.6);
-        }
-        .tab-panel {
+        details > summary::-webkit-details-marker {
             display: none;
         }
-        .tab-panel.active {
-            display: block;
+
+        /* Terminal Blink */
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased selection:bg-brand-primary selection:text-white font-mono">
 
     <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-ledger-bg/80 backdrop-blur-md border-b border-ledger-border transition-all duration-300" id="navbar">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 border-b border-brand-border bg-brand-bg/90 backdrop-blur-md">
+        <div class="container mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="font-display font-bold text-xl tracking-tight text-white">LedgerDB</span>
+                <span class="font-display font-bold text-xl tracking-tight text-white hover:text-brand-primary transition-colors cursor-pointer uppercase">
+                    <span class="text-brand-primary">>_</span> LedgerDB
+                </span>
             </div>
             
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-ledger-muted">
-                <!-- Links centralizados -->
-                <a href="#overview" class="hover:text-white transition-colors">Overview</a>
-                <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
-                <a href="#performance" class="hover:text-white transition-colors">Performance</a>
-                <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+            <div class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-brand-muted">
+                <a href="#overview" class="hover:text-white transition-colors">[Overview]</a>
+                <a href="#architecture" class="hover:text-white transition-colors">[Architecture]</a>
+                <a href="#performance" class="hover:text-white transition-colors">[Performance]</a>
+                <a href="#faq" class="hover:text-white transition-colors">[FAQ]</a>
             </div>
 
-            <!-- Botões de Ação (Get Started + GitHub) -->
-            <div class="flex items-center gap-3">
-                <a href="#get-started" class="hidden sm:inline-flex items-center justify-center px-5 py-2 font-medium text-white transition duration-300 ease-out border border-ledger-primary bg-ledger-primary/10 hover:bg-ledger-primary/20 rounded-full shadow-md">
-                    <span>Get Started</span>
+            <div class="flex items-center gap-4">
+                <a href="#get-started" class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-bold text-black bg-white uppercase tracking-wide hover:bg-gray-200 transition-colors">
+                    Get Started
                 </a>
-
-                <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="group relative inline-flex items-center justify-center px-5 py-2 overflow-hidden font-medium text-white transition duration-300 ease-out border border-ledger-border rounded-full shadow-md hover:bg-white/5">
-                    <i class="fa-brands fa-github text-lg mr-2"></i>
-                    <span>GitHub</span>
+                <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="text-brand-muted hover:text-white transition-colors">
+                    <i class="fa-brands fa-github text-lg"></i>
                 </a>
             </div>
         </div>
@@ -183,15 +156,15 @@
     <!-- Hero Section -->
     <header class="relative pt-32 lg:pt-48 pb-12 overflow-hidden">
         <!-- Ambient Glow -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-ledger-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-radial from-brand-primary/10 to-transparent opacity-40 pointer-events-none"></div>
 
         <div class="container mx-auto px-4 text-center relative z-10">
             
-            <h1 class="text-5xl md:text-7xl font-bold font-display tracking-tight mb-6 reveal" style="transition-delay: 100ms;">
-                Database as <span class="text-transparent bg-clip-text bg-gradient-to-r from-ledger-primary to-ledger-accent">Code</span>.
+            <h1 class="text-4xl md:text-7xl font-display font-bold leading-none mb-6 text-white tracking-tight reveal">
+                Database as <span class="text-brand-primary glow-text">Code</span>.
             </h1>
             
-            <p class="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto mb-10 reveal" style="transition-delay: 200ms;">
+            <p class="text-lg text-brand-muted max-w-2xl mx-auto mb-10 font-sans reveal" style="transition-delay: 100ms;">
                 Immutable transaction files inside a Git repository. <br class="hidden md:block" />
                 No global locks. Deterministic concurrency. 100% Audit trail.
             </p>
@@ -201,13 +174,12 @@
     <main class="space-y-32 pb-32">
 
         <!-- SECTION: OVERVIEW VIDEO -->
-        <section id="overview" class="container mx-auto px-4 reveal">
-            <div class="max-w-4xl mx-auto glass-card p-2 rounded-2xl overflow-hidden relative group">
-                <!-- Video Container (16:9 Aspect Ratio) -->
-                <div class="relative w-full pb-[56.25%] h-0 bg-black/50 rounded-xl">
+        <section id="overview" class="container mx-auto px-4 reveal" style="transition-delay: 200ms;">
+            <div class="max-w-4xl mx-auto border border-brand-border bg-black shadow-2xl p-1 relative group">
+                <div class="relative w-full pb-[56.25%] h-0 bg-brand-surface">
                     <iframe 
                         src="https://drive.google.com/file/d/19FoRjdSorkD1QhizksgO8V3ahZde0H_4/preview" 
-                        class="absolute top-0 left-0 w-full h-full rounded-xl"
+                        class="absolute top-0 left-0 w-full h-full"
                         allow="autoplay"
                         allowfullscreen
                         frameborder="0">
@@ -216,61 +188,139 @@
             </div>
         </section>
 
-        <!-- SECTION 0: GET STARTED -->
+        <!-- SECTION: FEATURES MATRIX (NEW) -->
+        <section id="features" class="container mx-auto px-4 reveal">
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-3xl font-display font-bold mb-2 text-white uppercase tracking-tight">Core Capabilities</h2>
+                <div class="h-1 w-10 bg-brand-primary mx-auto"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                
+                <!-- Card 1 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-brand-primary/50 transition-colors">
+                        <i class="fa-brands fa-git-alt text-2xl text-brand-primary"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">Git-Native</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Database transactions are stored as standard Git objects. Every write is a commit, every sync is a push.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-brand-secondary/50 transition-colors">
+                        <i class="fa-solid fa-database text-2xl text-brand-secondary"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">SQLite Sidecar</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Reads are served from a materialized SQLite index. Get the write speed of append-only logs with the query power of SQL.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-brand-success/50 transition-colors">
+                        <i class="fa-solid fa-fingerprint text-2xl text-brand-success"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">Tamper-Evident</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Built on a Merkle DAG. Every state change is cryptographically linked to its parent. History cannot be rewritten without detection.
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-white/50 transition-colors">
+                        <i class="fa-solid fa-wifi text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">Offline-First</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Writes occur locally and sync asynchronously. The system is designed for partition tolerance and eventual consistency.
+                    </p>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-brand-primary/50 transition-colors">
+                        <i class="fa-solid fa-file-contract text-2xl text-brand-primary"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">Strict Schema</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Enforce structure with JSON Schema. Writes are validated before they hit the ledger, ensuring data quality at the source.
+                    </p>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="glass-panel p-8 group hover:bg-brand-surface/50 transition-all duration-300">
+                    <div class="w-12 h-12 mb-6 flex items-center justify-center border border-brand-border bg-black group-hover:border-brand-secondary/50 transition-colors">
+                        <i class="fa-solid fa-rotate text-2xl text-brand-secondary"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase mb-3 tracking-wide">Atomic CAS</h3>
+                    <p class="text-brand-muted text-sm leading-relaxed font-sans">
+                        Concurrency is handled via optimistic locking (Compare-And-Swap) on the Git reference. No global locks required.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 0: GET STARTED (Terminal Tabs) -->
         <section id="get-started" class="container mx-auto px-4 reveal">
             <div class="text-center mb-12">
-                <span class="text-ledger-accent font-mono text-sm tracking-widest uppercase">Get Started</span>
-                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">From Git Repo to Queryable Data</h2>
-                <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
-                    A Git-native ledger with a SQLite sidecar index for fast reads and near real-time updates.
+                <h2 class="text-2xl md:text-3xl font-display font-bold mb-2 text-white uppercase tracking-tight">Quick Start</h2>
+                <div class="h-1 w-10 bg-brand-primary mx-auto"></div>
+                <p class="text-brand-muted mt-4 font-sans text-sm">
+                    Git-native ledger with a SQLite sidecar index.
                 </p>
             </div>
 
             <div class="max-w-4xl mx-auto">
-                <div class="glass-card p-8 rounded-2xl" data-tab-group="quickstart">
-                    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-terminal text-ledger-accent"></i> Quick Start
-                        </h3>
-                        <div class="flex flex-wrap gap-2" role="tablist" aria-label="Quick start tabs">
-                            <button class="tab-btn active" data-tab="cli" type="button" aria-selected="true">CLI</button>
-                            <button class="tab-btn" data-tab="go" type="button" aria-selected="false">Go</button>
-                            <button class="tab-btn" data-tab="rust" type="button" aria-selected="false">Rust</button>
-                            <button class="tab-btn" data-tab="ts" type="button" aria-selected="false">TypeScript</button>
-                        </div>
+                <div class="border border-brand-border bg-black shadow-2xl">
+                    <div class="flex border-b border-brand-border bg-brand-surface overflow-x-auto">
+                        <button onclick="switchTab('cli')" id="btn-cli" class="px-6 py-3 text-xs font-bold text-white bg-black border-t-2 border-brand-primary tracking-wider transition-all">CLI</button>
+                        <button onclick="switchTab('go')" id="btn-go" class="px-6 py-3 text-xs font-bold text-brand-muted hover:text-white hover:bg-black/50 tracking-wider transition-all">GO</button>
+                        <button onclick="switchTab('rust')" id="btn-rust" class="px-6 py-3 text-xs font-bold text-brand-muted hover:text-white hover:bg-black/50 tracking-wider transition-all">RUST</button>
+                        <button onclick="switchTab('ts')" id="btn-ts" class="px-6 py-3 text-xs font-bold text-brand-muted hover:text-white hover:bg-black/50 tracking-wider transition-all">TYPESCRIPT</button>
                     </div>
 
-                    <div class="tab-panel active" data-tab-panel="cli">
-                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code># Build
-make build
+                    <div id="content-cli" class="p-6 bg-black font-mono text-xs overflow-x-auto h-[350px] text-brand-text">
+<pre><code class="language-bash"><span class="text-brand-muted"># 1. Build</span>
+<span class="text-brand-primary">$</span> make build
 
-# Init repo (sharded + append history)
-ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode append
+<span class="text-brand-muted"># 2. Init repo (sharded + append history)</span>
+<span class="text-brand-primary">$</span> ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git \
+    --layout sharded --history-mode append
 
-# Apply schema and write data
-ledgerdb collection apply tasks --schema ./schemas/task.json --indexes "status,assignee"
-ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
+<span class="text-brand-muted"># 3. Apply schema</span>
+<span class="text-brand-primary">$</span> ledgerdb collection apply tasks \
+    --schema ./schemas/task.json \
+    --indexes "status,assignee"
 
-# Watch the SQLite index (state mode)
-ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-commits 200</code></pre>
-                        <p class="text-xs text-gray-400 mt-3">
-                            Tip: use <span class="text-white">--history-mode amend</span> for compact state-only repos, or <span class="text-white">--sync=false</span> for offline writes.
-                        </p>
+<span class="text-brand-muted"># 4. Write data</span>
+<span class="text-brand-primary">$</span> ledgerdb doc put tasks "task_0001" \
+    --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
+
+<span class="text-brand-success">✔ Commit 8a7b9c written.</span><span class="blink">_</span></code></pre>
                     </div>
 
-                    <div class="tab-panel" data-tab-panel="go">
-                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>package main
+                    <div id="content-go" class="p-6 bg-black font-mono text-xs overflow-x-auto h-[350px] text-brand-text hidden">
+<pre><code class="language-go"><span class="text-brand-primary">package</span> main
 
-import "github.com/osvaldoandrade/ledgerdb/sdk/go/ledgerdb" // preview
+<span class="text-brand-primary">import</span> "github.com/osvaldoandrade/ledgerdb/sdk/go/ledgerdb"
 
-func main() {
+<span class="text-brand-primary">func</span> main() {
   db, _ := ledgerdb.Open("./ledgerdb.git")
+  
+  <span class="text-brand-muted">// Atomic write</span>
   _ = db.Collection("tasks").Put("task_0001", map[string]any{
     "title": "Ship v1",
     "status": "todo",
     "priority": "high",
   })
 
+  <span class="text-brand-muted">// Sidecar indexing</span>
   _ = db.Index().Watch(ledgerdb.IndexOptions{
     Path: "./index.db",
     Mode: "state",
@@ -278,15 +328,15 @@ func main() {
     Fast: true,
   })
 }</code></pre>
-                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
                     </div>
 
-                    <div class="tab-panel" data-tab-panel="rust">
-                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>use ledgerdb::Client; // preview
+                    <div id="content-rust" class="p-6 bg-black font-mono text-xs overflow-x-auto h-[350px] text-brand-text hidden">
+<pre><code class="language-rust"><span class="text-brand-primary">use</span> ledgerdb::Client; 
 
-#[tokio::main]
-async fn main() -> Result<(), ledgerdb::Error> {
-    let db = Client::open("./ledgerdb.git").await?;
+<span class="text-brand-muted">#[tokio::main]</span>
+<span class="text-brand-primary">async fn</span> main() -> Result<(), ledgerdb::Error> {
+    <span class="text-brand-primary">let</span> db = Client::open("./ledgerdb.git").await?;
+    
     db.collection("tasks")
         .put("task_0001", serde_json::json!({
             "title": "Ship v1",
@@ -295,34 +345,29 @@ async fn main() -> Result<(), ledgerdb::Error> {
         }))
         .await?;
 
-    db.index().watch(ledgerdb::IndexOptions {
-        db_path: "./index.db".into(),
-        mode: "state".into(),
-        interval: "1s".into(),
-        fast: true,
-    }).await?;
     Ok(())
 }</code></pre>
-                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
                     </div>
 
-                    <div class="tab-panel" data-tab-panel="ts">
-                        <pre class="bg-black/30 border border-ledger-border rounded-xl p-4 text-xs md:text-sm text-gray-200 overflow-x-auto"><code>import { LedgerDB } from "@ledgerdb/sdk"; // preview
+                    <div id="content-ts" class="p-6 bg-black font-mono text-xs overflow-x-auto h-[350px] text-brand-text hidden">
+<pre><code class="language-typescript"><span class="text-brand-primary">import</span> { LedgerDB } from "@ledgerdb/sdk";
 
-const db = await LedgerDB.open({ repo: "./ledgerdb.git" });
+<span class="text-brand-primary">const</span> db = await LedgerDB.open({ repo: "./ledgerdb.git" });
+
+<span class="text-brand-muted">// Write</span>
 await db.collection("tasks").put("task_0001", {
   title: "Ship v1",
   status: "todo",
   priority: "high"
 });
 
+<span class="text-brand-muted">// Index</span>
 await db.index.watch({
   db: "./index.db",
   mode: "state",
   interval: "1s",
   fast: true
 });</code></pre>
-                        <p class="text-xs text-gray-400 mt-3">SDK preview. API surface may change.</p>
                     </div>
                 </div>
             </div>
@@ -330,29 +375,27 @@ await db.index.watch({
 
         <!-- SECTION 1: ARCHITECTURE (Visual Tree) -->
         <section id="architecture" class="container mx-auto px-4 reveal">
-            <div class="text-center mb-12">
-                <span class="text-ledger-primary font-mono text-sm tracking-widest uppercase">System Design</span>
-                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">The Database is the Filesystem</h2>
-                <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
-                    LedgerDB maps logical concepts directly to a directory structure.
-                    History lives in <span class="text-white">documents/</span>, current state in <span class="text-white">state/</span>,
-                    and schemas in <span class="text-white">collections/</span>. The SQLite sidecar sits next to the repo for fast queries.
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-3xl font-display font-bold mb-2 text-white uppercase tracking-tight">System Design</h2>
+                <div class="h-1 w-10 bg-brand-secondary mx-auto"></div>
+                <p class="text-brand-muted mt-4 font-sans text-sm">
+                    History lives in <code>documents/</code>. State in <code>state/</code>. Schema in <code>collections/</code>.
                 </p>
             </div>
 
-            <div class="max-w-5xl mx-auto glass-card p-8 md:p-12 rounded-3xl relative overflow-hidden">
+            <div class="max-w-5xl mx-auto glass-panel p-8 md:p-12 relative overflow-hidden">
                 <!-- Subtle Grid Background -->
-                <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+                <div class="absolute inset-0 opacity-[0.05]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
 
                 <!-- Tree Diagram -->
-                <div class="relative z-10 font-mono text-sm md:text-base">
+                <div class="relative z-10 font-mono text-xs md:text-sm">
                     <!-- Root -->
                     <div class="flex flex-col items-center">
-                <div class="bg-ledger-bg border border-ledger-border px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 relative z-10">
-                            <i class="fa-solid fa-server text-ledger-primary"></i>
+                        <div class="bg-black border border-brand-border px-6 py-3 shadow-xl flex items-center gap-3 relative z-10">
+                            <i class="fa-solid fa-server text-brand-primary"></i>
                             <div>
                                 <div class="font-bold text-white">db-root/</div>
-                                <div class="text-[10px] text-gray-400 flex items-center gap-2">
+                                <div class="text-[10px] text-brand-muted flex items-center gap-2">
                                     <i class="fa-regular fa-file-lines"></i> db.yaml
                                 </div>
                             </div>
@@ -362,7 +405,7 @@ await db.index.watch({
 
                     <!-- Connectors -->
                     <div class="flex justify-center relative mb-8">
-                        <div class="w-3/4 border-t-2 border-ledger-border absolute top-0"></div>
+                        <div class="w-3/4 border-t border-brand-border absolute top-0"></div>
                         <!-- Vertical Lines Drop -->
                         <div class="w-full flex justify-between px-[12.5%]">
                             <div class="tree-line-v h-8"></div> <!-- Left -->
@@ -376,11 +419,11 @@ await db.index.watch({
                         
                         <!-- Col 1: Config -->
                         <div class="flex flex-col items-center">
-                            <div class="glass-card w-full p-4 rounded-xl border-l-4 border-l-ledger-accent">
-                                <div class="flex items-center gap-2 mb-3 text-ledger-accent font-bold">
+                            <div class="glass-panel w-full p-4 border-t-2 border-t-brand-secondary">
+                                <div class="flex items-center gap-2 mb-3 text-brand-secondary font-bold">
                                     <i class="fa-regular fa-folder-open"></i> collections/
                                 </div>
-                                <ul class="space-y-2 text-xs text-gray-400 pl-4">
+                                <ul class="space-y-2 text-[10px] text-brand-muted pl-4">
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-file-code"></i> schema.json</li>
                                     <li class="flex items-center gap-2"><i class="fa-solid fa-list-check"></i> indexes.json</li>
                                 </ul>
@@ -389,23 +432,22 @@ await db.index.watch({
 
                         <!-- Col 2: Documents (Hot) -->
                         <div class="flex flex-col items-center transform md:-translate-y-4">
-                            <div class="glass-card w-full p-4 rounded-xl border-l-4 border-l-ledger-pink shadow-[0_0_30px_-10px_rgba(236,72,153,0.3)]">
-                                <div class="flex items-center justify-between mb-3 text-ledger-pink font-bold">
+                            <div class="glass-panel w-full p-4 border-t-2 border-t-brand-primary shadow-[0_0_30px_-10px_rgba(139,92,246,0.15)]">
+                                <div class="flex items-center justify-between mb-3 text-brand-primary font-bold">
                                     <div class="flex items-center gap-2"><i class="fa-regular fa-folder-open"></i> documents/</div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] border border-ledger-pink/60 text-ledger-pink px-2 rounded">SHARDED</span>
-                                        <span class="text-[10px] bg-ledger-pink text-white px-2 rounded">HISTORY</span>
+                                        <span class="text-[9px] border border-brand-primary/50 text-brand-primary px-1">SHARDED</span>
                                     </div>
                                 </div>
-                                <div class="bg-white/5 rounded p-3 border border-white/5">
-                                    <div class="text-xs text-gray-300 mb-2">DOC_&lt;hash&gt;/</div>
-                                    <ul class="space-y-2 text-xs pl-2 border-l border-ledger-border ml-1">
+                                <div class="bg-brand-surface rounded p-3 border border-brand-border">
+                                    <div class="text-[10px] text-brand-muted mb-2">DOC_&lt;hash&gt;/</div>
+                                    <ul class="space-y-2 text-[10px] pl-2 border-l border-brand-border ml-1">
                                         <li class="flex items-center justify-between text-white font-bold group cursor-pointer">
-                                            <span><i class="fa-solid fa-location-arrow text-ledger-pink mr-1"></i> HEAD</span>
-                                            <span class="text-[9px] text-gray-500 group-hover:text-ledger-pink transition-colors">POINTER</span>
+                                            <span><i class="fa-solid fa-location-arrow text-brand-primary mr-1"></i> HEAD</span>
+                                            <span class="text-[9px] text-brand-muted">POINTER</span>
                                         </li>
-                                        <li class="flex items-center gap-2 text-ledger-primary"><i class="fa-regular fa-file-lines"></i> tx/2025..._put.txpb</li>
-                                        <li class="flex items-center gap-2 text-gray-600"><i class="fa-regular fa-file-lines"></i> tx/2025..._patch.txpb</li>
+                                        <li class="flex items-center gap-2 text-brand-primary"><i class="fa-regular fa-file-lines"></i> tx/2025..._put.txpb</li>
+                                        <li class="flex items-center gap-2 text-brand-muted"><i class="fa-regular fa-file-lines"></i> tx/2025..._patch.txpb</li>
                                     </ul>
                                 </div>
                             </div>
@@ -413,22 +455,21 @@ await db.index.watch({
 
                         <!-- Col 3: State -->
                         <div class="flex flex-col items-center">
-                            <div class="glass-card w-full p-4 rounded-xl border-l-4 border-l-emerald-500 opacity-80 hover:opacity-100 transition-opacity">
-                                <div class="flex items-center justify-between mb-3 text-emerald-500 font-bold">
+                            <div class="glass-panel w-full p-4 border-t-2 border-t-brand-success opacity-80 hover:opacity-100 transition-opacity">
+                                <div class="flex items-center justify-between mb-3 text-brand-success font-bold">
                                     <div class="flex items-center gap-2"><i class="fa-regular fa-folder-open"></i> state/</div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] border border-emerald-400/60 text-emerald-300 px-2 rounded">SHARDED</span>
-                                        <span class="text-[10px] bg-emerald-500 text-white px-2 rounded">LATEST</span>
+                                        <span class="text-[9px] border border-brand-success/50 text-brand-success px-1">LATEST</span>
                                     </div>
                                 </div>
-                                <div class="bg-white/5 rounded p-3 border border-white/5">
-                                    <div class="text-xs text-gray-300 mb-2">DOC_&lt;hash&gt;/</div>
-                                    <ul class="space-y-2 text-xs pl-2 border-l border-ledger-border ml-1">
+                                <div class="bg-brand-surface rounded p-3 border border-brand-border">
+                                    <div class="text-[10px] text-brand-muted mb-2">DOC_&lt;hash&gt;/</div>
+                                    <ul class="space-y-2 text-[10px] pl-2 border-l border-brand-border ml-1">
                                         <li class="flex items-center justify-between text-white font-bold">
-                                            <span><i class="fa-solid fa-location-arrow text-emerald-400 mr-1"></i> HEAD</span>
-                                            <span class="text-[9px] text-gray-500">POINTER</span>
+                                            <span><i class="fa-solid fa-location-arrow text-brand-success mr-1"></i> HEAD</span>
+                                            <span class="text-[9px] text-brand-muted">POINTER</span>
                                         </li>
-                                        <li class="flex items-center gap-2 text-emerald-300"><i class="fa-regular fa-file-lines"></i> tx/current.txpb</li>
+                                        <li class="flex items-center gap-2 text-brand-success"><i class="fa-regular fa-file-lines"></i> tx/current.txpb</li>
                                     </ul>
                                 </div>
                             </div>
@@ -439,221 +480,197 @@ await db.index.watch({
             </div>
         </section>
 
-        <!-- SECTION 2: WORKFLOW (9 Steps Grid) -->
+        <!-- SECTION 2: WORKFLOW -->
         <section id="workflow" class="container mx-auto px-4 reveal">
-            <div class="text-center mb-12">
-                <span class="text-ledger-pink font-mono text-sm tracking-widest uppercase">Concurrency Model</span>
-                <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">CAS Write Flow (Optimistic)</h2>
-                <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
-                    Writes are serialized by an atomic compare-and-set on <span class="text-white">refs/heads/main</span>, with retries on conflict.
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-3xl font-display font-bold mb-2 text-white uppercase tracking-tight">CAS Write Flow</h2>
+                <div class="h-1 w-10 bg-brand-primary mx-auto"></div>
+                <p class="text-brand-muted mt-4 font-sans text-sm">
+                    Atomic compare-and-set on <code>refs/heads/main</code>.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-9 gap-4 relative">
                 <!-- Connector Line (Desktop Only) -->
-                <div class="hidden lg:block absolute top-1/2 left-0 w-full h-1 bg-ledger-border -z-10 rounded-full transform -translate-y-1/2"></div>
+                <div class="hidden lg:block absolute top-1/2 left-0 w-full h-[1px] bg-brand-border -z-10 transform -translate-y-1/2"></div>
 
-                <!-- Steps Generation -->
-                <!-- 1. Read Ref -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">1</div>
-                    <i class="fa-solid fa-code-branch text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Read Main Ref</h4>
-                    <p class="step-desc">Load refs/heads/main</p>
+                <!-- Steps -->
+                <!-- 1 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">1</div>
+                    <i class="fa-solid fa-code-branch text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Read Ref</h4>
                 </div>
-
-                <!-- 2. Read Stream -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">2</div>
-                    <i class="fa-solid fa-glasses text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Read Stream HEAD</h4>
-                    <p class="step-desc">Resolve current tx pointer</p>
+                <!-- 2 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">2</div>
+                    <i class="fa-solid fa-glasses text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Read HEAD</h4>
                 </div>
-
-                <!-- 3. Build -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">3</div>
-                    <i class="fa-solid fa-hammer text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Build Tx</h4>
-                    <p class="step-desc">Create transaction object</p>
+                <!-- 3 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">3</div>
+                    <i class="fa-solid fa-hammer text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Build Tx</h4>
                 </div>
-
-                <!-- 4. Hash -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">4</div>
-                    <i class="fa-solid fa-link text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Canonicalize</h4>
-                    <p class="step-desc">Compute SHA-256 hashes</p>
+                <!-- 4 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">4</div>
+                    <i class="fa-solid fa-link text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Hash</h4>
                 </div>
-
-                <!-- 5. Validate -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">5</div>
-                    <i class="fa-solid fa-check-double text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Validate</h4>
-                    <p class="step-desc">Check JSON Schema</p>
+                <!-- 5 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">5</div>
+                    <i class="fa-solid fa-check-double text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Validate</h4>
                 </div>
-
-                <!-- 6. Write Blobs (Highlight) -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">6</div>
-                    <i class="fa-solid fa-file-export text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Write Blobs</h4>
-                    <p class="step-desc">Tx + HEAD + state</p>
+                <!-- 6 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black border-brand-primary">
+                    <div class="w-6 h-6 bg-brand-primary text-white flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-primary">6</div>
+                    <i class="fa-solid fa-file-export text-brand-primary text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Write Blobs</h4>
                 </div>
-
-                <!-- 7. Build Commit -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">7</div>
-                    <i class="fa-solid fa-diagram-project text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Build Commit</h4>
-                    <p class="step-desc">Update tree + commit</p>
+                <!-- 7 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">7</div>
+                    <i class="fa-solid fa-diagram-project text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Commit</h4>
                 </div>
-
-                <!-- 8. CAS Update -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">8</div>
-                    <i class="fa-solid fa-shield-halved text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">CAS Update</h4>
-                    <p class="step-desc">Check-and-set main ref</p>
+                <!-- 8 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">8</div>
+                    <i class="fa-solid fa-shield-halved text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">CAS</h4>
                 </div>
-
-                <!-- 9. Retry -->
-                <div class="glass-card p-4 rounded-xl flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-ledger-bg">
-                    <div class="w-8 h-8 rounded-full bg-ledger-border text-white flex items-center justify-center font-bold text-xs absolute -top-4 border-4 border-ledger-bg group-hover:bg-white transition-colors">9</div>
-                    <i class="fa-solid fa-rotate-right text-gray-400 text-xl mb-1"></i>
-                    <h4 class="font-bold text-xs uppercase text-gray-300">Retry/Backoff</h4>
-                    <p class="step-desc">On conflict, retry</p>
+                <!-- 9 -->
+                <div class="glass-panel p-4 flex flex-col items-center text-center gap-2 h-full justify-center group relative bg-black">
+                    <div class="w-6 h-6 bg-brand-surface text-brand-muted flex items-center justify-center font-bold text-[10px] absolute -top-3 border border-brand-border">9</div>
+                    <i class="fa-solid fa-rotate-right text-brand-muted text-lg mb-1"></i>
+                    <h4 class="font-bold text-[10px] uppercase text-white">Retry</h4>
                 </div>
             </div>
         </section>
 
         <!-- SECTION 3: PERFORMANCE (Charts) -->
         <section id="performance" class="container mx-auto px-4 reveal">
-            <div class="mb-12 flex flex-col md:flex-row justify-between items-end border-b border-ledger-border pb-6">
+            <div class="mb-12 flex flex-col md:flex-row justify-between items-end border-b border-brand-border pb-6">
                 <div>
-                    <span class="text-ledger-accent font-mono text-sm tracking-widest uppercase">Performance</span>
-                    <h2 class="text-3xl md:text-4xl font-display font-bold mt-2">Predictable, Measured, Rebuildable</h2>
-                    <p class="text-gray-400 mt-2">Writes are O(1) appends. Reads are rehydrated or served from the SQLite sidecar.</p>
+                    <h2 class="text-2xl md:text-3xl font-display font-bold mb-2 text-white uppercase tracking-tight">Write Throughput</h2>
+                    <p class="text-brand-muted mt-2 text-sm font-sans">Writes are O(1) appends. Reads served from SQLite sidecar.</p>
                 </div>
                 <div class="mt-4 md:mt-0 text-right">
-                    <div class="text-ledger-pink font-bold text-3xl">32</div>
-                    <div class="text-xs text-gray-500 uppercase">Default Max Chain</div>
+                    <div class="text-brand-primary font-bold text-3xl font-mono">32</div>
+                    <div class="text-[10px] text-brand-muted uppercase tracking-widest">Default Max Chain</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-8">
-                <!-- Throughput Chart -->
-                <div class="glass-card p-6 rounded-2xl flex flex-col">
-                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-ledger-accent"></i> Measured Write Throughput
-                    </h3>
-                    <p class="text-xs text-gray-400 mb-4 h-12">
-                        CLI benchmarks from local runs. Each bar shows average writes/sec for a specific history + index mode.
-                    </p>
-                    <div class="chart-container flex-grow">
-                        <canvas id="complexityChart"></canvas>
-                    </div>
-                    <div class="mt-4 grid gap-2 text-xs text-gray-400">
-                        <div><span class="text-white">Append + State</span> — 5000 puts / 2500 updates / 100 deletes (1s watch)</div>
-                        <div><span class="text-white">Amend + State</span> — 2000 puts / 400 updates / 100 deletes (1s watch)</div>
-                        <div><span class="text-white">State Watch 250ms</span> — 1000 puts / 200 updates / 40 deletes</div>
-                    </div>
+            <div class="glass-panel p-6">
+                <div class="chart-container">
+                    <canvas id="complexityChart"></canvas>
+                </div>
+                <div class="mt-4 grid gap-2 text-[10px] text-brand-muted font-mono">
+                    <div><span class="text-brand-secondary">Append + State</span> — 5000 puts / 2500 updates / 100 deletes</div>
+                    <div><span class="text-brand-primary">Amend + State</span> — 2000 puts / 400 updates / 100 deletes</div>
+                    <div><span class="text-brand-success">State Watch 250ms</span> — 1000 puts / 200 updates / 40 deletes</div>
                 </div>
             </div>
         </section>
 
-        <!-- SECTION 4: FAQ (No Storage Chart) -->
+        <!-- SECTION 4: FAQ -->
         <section id="faq" class="container mx-auto px-4 reveal">
             <div class="max-w-4xl mx-auto space-y-4">
-                <h3 class="text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h3>
+                <div class="text-center mb-12">
+                    <h2 class="text-2xl font-display font-bold mb-2 uppercase tracking-tight">FAQ</h2>
+                    <div class="h-1 w-10 bg-brand-muted mx-auto"></div>
+                </div>
                 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>What problem does LedgerDB solve?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         LedgerDB is for applications that need auditability, offline-first writes, and easy replication without running a centralized database service. It stores immutable transactions in Git, so teams can reduce infrastructure overhead while keeping a reliable, verifiable history of state changes.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>How do reads work (CQRS + SQLite sidecar)?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         Git is the write model and source of truth. The SQLite sidecar is a derived read model that can be rebuilt at any time. The indexer tails commits or the state tree and projects documents into tables for fast queries.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>What is the state index and why is it fast?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         The state tree stores the latest snapshot per document. Indexing in <span class="text-white">state</span> mode diffs the state tree and applies only changed docs (O(changes)), which makes near real-time updates practical.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>What are append vs amend history modes?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         <span class="text-white">Append</span> keeps full history per document (audit trail). <span class="text-white">Amend</span> stores only the latest state per document (compact). Both can use the state index for fast reads.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>Why sharding in the filesystem?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         Sharding spreads files across deep directories so large collections stay fast and avoid OS directory limits. It keeps lookup time stable as the dataset grows.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>What happens when a push is rejected?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         A push can be rejected when the remote advanced (non-fast-forward). The client fetches the new head and detects divergence. If auto-merge is enabled, it rehydrates both histories, applies a deterministic merge policy, writes a merge transaction, and retries the push. If it cannot merge safely, it surfaces a conflict for manual resolution.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>Do you need Raft or consensus to be safe?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         LedgerDB uses optimistic concurrency with atomic compare-and-set on the Git ref. You can choose a coordinator for single-writer semantics, or layer consensus if strict linearizability is required, but it is not mandatory for correctness.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>How is the tree validated during commit?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         Each write produces deterministic transaction bytes, hashes them, and updates the stream HEAD pointer. The commit rewrites only the affected paths, then atomically swaps refs/heads/main. If the ref moved, the write is rejected and retried, guaranteeing the committed tree matches the expected parent state.
                     </div>
                 </details>
 
-                <details class="glass-card rounded-xl group">
-                    <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-white list-none">
+                <details class="group bg-brand-surface border border-brand-border">
+                    <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-white text-sm uppercase tracking-wide hover:bg-brand-border/50 transition-colors">
                         <span>Is LedgerDB a replacement for Redis or DynamoDB?</span>
-                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-ledger-primary"></i></span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down text-brand-primary"></i></span>
                     </summary>
-                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed border-t border-ledger-border/50 pt-4">
+                    <div class="text-brand-muted text-sm leading-relaxed px-5 pb-5 pt-0 border-t border-brand-border font-sans mt-4">
                         Not a drop-in replacement. LedgerDB trades microsecond latency and managed global throughput for auditability, offline-first writes, and decentralized replication. It can be a lower-cost alternative for many workloads that do not need a centralized cloud database.
                     </div>
                 </details>
@@ -663,34 +680,53 @@ await db.index.watch({
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#020408] border-t border-ledger-border py-12">
-        <div class="container mx-auto px-4 text-center">
-            <h4 class="text-2xl font-display font-bold text-white mb-2">LedgerDB</h4>
-            <p class="text-gray-500 mb-8 max-w-sm mx-auto">The open-source, git-native database for high-integrity systems.</p>
-            
-            <a href="https://github.com/osvaldoandrade/ledgerdb" target="_blank" class="inline-flex items-center text-gray-400 hover:text-white transition-colors">
-                <i class="fa-brands fa-github text-xl mr-2"></i> osvaldoandrade/ledgerdb
-            </a>
-
-            <div class="mt-12 pt-8 border-t border-white/5 text-xs text-gray-700">
-                &copy; 2026 LedgerDB. Released under MIT License.
+    <footer class="border-t border-brand-border bg-[#000000] py-12 font-mono text-xs">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="font-bold text-lg text-white tracking-widest">LedgerDB</span>
+                    </div>
+                    <p class="text-brand-muted max-w-sm mb-4">
+                        The open-source, git-native database for high-integrity systems.
+                    </p>
+                    <p class="text-brand-primary">Supported by code|company</p>
+                </div>
+                
+                <div>
+                    <h5 class="font-bold text-white mb-4 uppercase tracking-widest">Related Projects</h5>
+                    <ul class="space-y-2 text-brand-muted">
+                        <li><a href="https://osvaldoandrade.github.com/codeq" target="_blank" class="hover:text-brand-primary hover:underline">CodeQ</a></li>
+                        <li><a href="https://osvaldoandrade.github.com/tikti" target="_blank" class="hover:text-brand-primary hover:underline">Tikti</a></li>
+                        <li><a href="https://osvaldoandrade.github.com/neuron" target="_blank" class="hover:text-brand-primary hover:underline">Neuron</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="font-bold text-white mb-4 uppercase tracking-widest">System</h5>
+                    <ul class="space-y-2 text-brand-muted">
+                        <li><a href="https://github.com/osvaldoandrade/ledgerdb" class="hover:text-brand-primary hover:underline">GitHub</a></li>
+                        <li><a href="#" class="hover:text-brand-primary hover:underline">Docs</a></li>
+                    </ul>
+                </div>
             </div>
+            
         </div>
     </footer>
 
-    <!-- Scripts for Charts & Animation -->
+    <!-- Scripts -->
     <script>
         // --- 1. Colors & Defaults ---
         const colors = {
-            primary: '#6366F1',
-            accent: '#06B6D4',
-            pink: '#EC4899',
-            purple: '#8B5CF6',
-            text: '#94A3B8'
+            primary: '#8B5CF6',
+            secondary: '#F59E0B',
+            success: '#10B981',
+            text: '#E5E5E5',
+            muted: '#737373'
         };
-        Chart.defaults.color = colors.text;
-        Chart.defaults.borderColor = '#334155';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = colors.muted;
+        Chart.defaults.borderColor = '#333';
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
 
         // --- 2. Scroll Reveal Observer ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -704,31 +740,27 @@ await db.index.watch({
             }, { threshold: 0.1 });
             
             reveals.forEach(el => observer.observe(el));
-
-            const tabGroups = document.querySelectorAll('[data-tab-group]');
-            tabGroups.forEach(group => {
-                const buttons = group.querySelectorAll('[data-tab]');
-                const panels = group.querySelectorAll('[data-tab-panel]');
-                const activate = (name) => {
-                    buttons.forEach(btn => {
-                        const active = btn.dataset.tab === name;
-                        btn.classList.toggle('active', active);
-                        btn.setAttribute('aria-selected', active ? 'true' : 'false');
-                    });
-                    panels.forEach(panel => {
-                        panel.classList.toggle('active', panel.dataset.tabPanel === name);
-                    });
-                };
-                if (buttons.length > 0) {
-                    activate(buttons[0].dataset.tab);
-                }
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', () => activate(btn.dataset.tab));
-                });
-            });
         });
 
-        // --- 3. Throughput Chart ---
+        // --- 3. Tab Logic ---
+        function switchTab(tabName) {
+            const tabs = ['cli', 'go', 'rust', 'ts'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                
+                if (t === tabName) {
+                    content.classList.remove('hidden');
+                    btn.className = 'px-6 py-3 text-xs font-bold text-white bg-black border-t-2 border-brand-primary tracking-wider transition-all';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'px-6 py-3 text-xs font-bold text-brand-muted hover:text-white hover:bg-black/50 tracking-wider transition-all';
+                }
+            });
+        }
+
+        // --- 4. Throughput Chart ---
         const valueLabelPlugin = {
             id: 'valueLabel',
             afterDatasetsDraw(chart) {
@@ -736,14 +768,13 @@ await db.index.watch({
                 ctx.save();
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
                     const meta = chart.getDatasetMeta(datasetIndex);
-                    if (meta.hidden) {
-                        return;
-                    }
+                    if (meta.hidden) return;
+                    
                     meta.data.forEach((element, index) => {
                         const value = dataset.data[index];
                         const label = Number(value).toFixed(2);
-                        ctx.fillStyle = '#F8FAFC';
-                        ctx.font = '12px Inter, sans-serif';
+                        ctx.fillStyle = '#E5E5E5';
+                        ctx.font = '10px JetBrains Mono';
                         ctx.textAlign = 'left';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(label, element.x + 8, element.y);
@@ -758,13 +789,13 @@ await db.index.watch({
         new Chart(ctxComp, {
             type: 'bar',
             data: {
-                labels: ['Append + State', 'Amend + State', 'State watch 250ms'],
+                labels: ['Append', 'Amend', 'Watch'],
                 datasets: [{
                     label: 'Avg writes/sec',
                     data: [56.72, 65.79, 65.26],
-                    backgroundColor: [colors.accent, colors.primary, colors.pink],
-                    borderRadius: 6,
-                    barThickness: 22
+                    backgroundColor: [colors.secondary, colors.primary, colors.success],
+                    borderRadius: 2,
+                    barThickness: 16
                 }]
             },
             options: {
@@ -774,17 +805,25 @@ await db.index.watch({
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: '#0A0A0A',
+                        titleFont: { family: 'JetBrains Mono' },
+                        bodyFont: { family: 'JetBrains Mono' },
+                        borderColor: '#333',
+                        borderWidth: 1,
                         callbacks: {
                             label: (ctx) => `${ctx.parsed.x} writes/sec`
                         }
                     }
                 },
                 scales: { 
-                    y: { grid: { display: false } },
+                    y: { 
+                        grid: { display: false },
+                        ticks: { font: { size: 10 } }
+                    },
                     x: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(51,65,85,0.4)' },
-                        title: { display: true, text: 'avg writes/sec' }
+                        grid: { color: 'rgba(51,51,51,0.5)' },
+                        title: { display: true, text: 'avg writes/sec', font: { size: 10 } }
                     }
                 }
             }
