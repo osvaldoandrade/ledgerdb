@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: cut-release-${{ github.ref }}
@@ -47,3 +48,11 @@ jobs:
           git tag "$TAG"
           git push origin "$TAG"
 
+      - name: Trigger publish workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v${{ inputs.version }}"
+          gh workflow run publish-github-packages --ref "$TAG"
