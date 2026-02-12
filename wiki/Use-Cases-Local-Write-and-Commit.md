@@ -1,4 +1,4 @@
-# Use Case: Local Write and Commit
+# Local Write and Commit
 
 Create or update a document with deterministic validation and atomic head update.
 

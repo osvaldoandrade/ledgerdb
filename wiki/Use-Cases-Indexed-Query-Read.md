@@ -1,4 +1,4 @@
-# Use Case: Indexed Query Read
+# Indexed Query Read
 
 Read current-state data through SQLite sidecar index.
 

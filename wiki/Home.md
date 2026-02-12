@@ -1,10 +1,10 @@
-# LedgerDB Wiki
+# LedgerDB
 
 LedgerDB is a git-native document database built for immutable history, offline-first writes, cryptographic integrity, and deterministic sync.
 
-This wiki is structured as a docs portal with the same depth expected in production-grade systems documentation.
+Start with [Get Started](Get-Started).
 
-## Quick Start Path
+If you are evaluating LedgerDB end-to-end, the fastest reading path is:
 
 1. [Get Started](Get-Started)
 2. [Overview](Overview)
@@ -12,31 +12,4 @@ This wiki is structured as a docs portal with the same depth expected in product
 4. [Storage Engine and Interface](Storage-Engine-and-Interface)
 5. [Execution Model and Consistency](Execution-Model-and-Consistency)
 
-## Documentation Map
-
-### Foundations
-
-- [Get Started](Get-Started)
-- [Overview](Overview)
-- [Architecture](Architecture)
-- [Storage Engine and Interface](Storage-Engine-and-Interface)
-- [Partitioning and Distribution Strategy](Partitioning-and-Distribution-Strategy)
-
-### Core Architecture
-
-- [Versioning and Conflict Resolution](Versioning-and-Conflict-Resolution)
-- [Execution Model and Consistency](Execution-Model-and-Consistency)
-- [Replication and Synchronization Strategy](Replication-and-Synchronization-Strategy)
-- [Integrity and Security Strategy](Integrity-and-Security-Strategy)
-
-### Query and Operations
-
-- [Querying and Indexing Strategy](Querying-and-Indexing-Strategy)
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy)
-- [CLI Reference](CLI-Reference)
-- [Troubleshooting](Troubleshooting)
-
-### SDK and Integration
-
-- [Client SDK Specifications](Client-SDK-Specifications)
-- [Use Cases](Use-Cases)
+For scenario-based behavior, read [Use Cases](Use-Cases).

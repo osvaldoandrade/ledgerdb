@@ -2,7 +2,6 @@ const NAV = [
   {
     section: "Start Here",
     pages: [
-      ["Home", "Home"],
       ["Get Started", "Get-Started"],
       ["Overview", "Overview"],
       ["Architecture", "Architecture"],
@@ -26,11 +25,11 @@ const NAV = [
     section: "Use Cases",
     pages: [
       ["Use Cases", "Use-Cases"],
-      ["Use Case: Local Write and Commit", "Use-Cases-Local-Write-and-Commit"],
-      ["Use Case: Offline First Sync", "Use-Cases-Offline-First-Sync"],
-      ["Use Case: Indexed Query Read", "Use-Cases-Indexed-Query-Read"],
-      ["Use Case: Integrity Verification", "Use-Cases-Integrity-Verification"],
-      ["Use Case: Conflict Detection and Resolution", "Use-Cases-Conflict-Detection-and-Resolution"],
+      ["Local Write and Commit", "Use-Cases-Local-Write-and-Commit"],
+      ["Offline First Sync", "Use-Cases-Offline-First-Sync"],
+      ["Indexed Query Read", "Use-Cases-Indexed-Query-Read"],
+      ["Integrity Verification", "Use-Cases-Integrity-Verification"],
+      ["Conflict Detection and Resolution", "Use-Cases-Conflict-Detection-and-Resolution"],
     ],
   },
   {
@@ -42,7 +41,7 @@ const NAV = [
   },
 ];
 
-const DEFAULT_PAGE = "Home";
+const DEFAULT_PAGE = "Get-Started";
 const navEl = document.getElementById("nav");
 const contentEl = document.getElementById("content");
 const searchEl = document.getElementById("search");
@@ -59,7 +58,8 @@ marked.setOptions({
 });
 
 function getPageFromUrl() {
-  const page = new URLSearchParams(window.location.search).get("page");
+  const raw = new URLSearchParams(window.location.search).get("page") || "";
+  const page = raw === "Home" ? DEFAULT_PAGE : raw;
   if (page && ALL_PAGE_SLUGS.includes(page)) {
     return page;
   }
@@ -100,12 +100,15 @@ function rewriteInternalLinks() {
       continue;
     }
 
-    const clean = href.replace(/^\.\//, "").replace(/\.md$/, "").replace(/\/$/, "");
-    if (!ALL_PAGE_SLUGS.includes(clean)) {
+    const [rawPath, rawHash] = href.split("#");
+    const clean = (rawPath || "").replace(/^\.\//, "").replace(/\.md$/, "").replace(/\/$/, "");
+    const resolved = clean === "Home" ? DEFAULT_PAGE : clean;
+    if (!ALL_PAGE_SLUGS.includes(resolved)) {
       continue;
     }
 
-    anchor.setAttribute("href", `?page=${encodeURIComponent(clean)}`);
+    const hash = rawHash ? `#${rawHash}` : "";
+    anchor.setAttribute("href", `?page=${encodeURIComponent(resolved)}${hash}`);
   }
 }
 
@@ -267,12 +270,13 @@ document.addEventListener("click", (event) => {
 
   event.preventDefault();
   const url = new URL(href, window.location.href);
-  const page = url.searchParams.get("page");
+  const raw = url.searchParams.get("page");
+  const page = raw === "Home" ? DEFAULT_PAGE : raw;
   if (!page || !ALL_PAGE_SLUGS.includes(page)) {
     return;
   }
 
-  history.pushState({}, "", `?page=${encodeURIComponent(page)}`);
+  history.pushState({}, "", `?page=${encodeURIComponent(page)}${url.hash || ""}`);
   loadPage(page);
 });
 

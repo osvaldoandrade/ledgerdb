@@ -1,7 +1,6 @@
 # LedgerDB Docs
 
 ## Start Here
-- [Home](Home)
 - [Get Started](Get-Started)
 - [Overview](Overview)
 - [Architecture](Architecture)
@@ -19,11 +18,11 @@
 
 ## Use Cases
 - [Use Cases](Use-Cases)
-- [Use Case: Local Write and Commit](Use-Cases-Local-Write-and-Commit)
-- [Use Case: Offline First Sync](Use-Cases-Offline-First-Sync)
-- [Use Case: Indexed Query Read](Use-Cases-Indexed-Query-Read)
-- [Use Case: Integrity Verification](Use-Cases-Integrity-Verification)
-- [Use Case: Conflict Detection and Resolution](Use-Cases-Conflict-Detection-and-Resolution)
+- [Local Write and Commit](Use-Cases-Local-Write-and-Commit)
+- [Offline First Sync](Use-Cases-Offline-First-Sync)
+- [Indexed Query Read](Use-Cases-Indexed-Query-Read)
+- [Integrity Verification](Use-Cases-Integrity-Verification)
+- [Conflict Detection and Resolution](Use-Cases-Conflict-Detection-and-Resolution)
 
 ## Operations
 - [CLI Reference](CLI-Reference)

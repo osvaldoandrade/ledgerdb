@@ -1,4 +1,4 @@
-# Use Case: Offline First Sync
+# Offline First Sync
 
 Allow local writes during disconnection and synchronize later.
 

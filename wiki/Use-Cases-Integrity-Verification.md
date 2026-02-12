@@ -1,4 +1,4 @@
-# Use Case: Integrity Verification
+# Integrity Verification
 
 Verify complete history for tamper evidence.
 

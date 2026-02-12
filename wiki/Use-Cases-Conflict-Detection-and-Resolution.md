@@ -1,4 +1,4 @@
-# Use Case: Conflict Detection and Resolution
+# Conflict Detection and Resolution
 
 Handle concurrent writes that diverge from different parents.
 
