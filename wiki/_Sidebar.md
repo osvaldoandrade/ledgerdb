@@ -4,6 +4,7 @@
 - [Home](Home)
 - [Get Started](Get-Started)
 - [Overview](Overview)
+- [Architecture](Architecture)
 
 ## Core Specs
 - [Storage Engine and Interface](Storage-Engine-and-Interface)

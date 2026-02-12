@@ -8,9 +8,9 @@ This wiki is structured as a docs portal with the same depth expected in product
 
 1. [Get Started](Get-Started)
 2. [Overview](Overview)
-3. [Storage Engine and Interface](Storage-Engine-and-Interface)
-4. [Execution Model and Consistency](Execution-Model-and-Consistency)
-5. [Querying and Indexing Strategy](Querying-and-Indexing-Strategy)
+3. [Architecture](Architecture)
+4. [Storage Engine and Interface](Storage-Engine-and-Interface)
+5. [Execution Model and Consistency](Execution-Model-and-Consistency)
 
 ## Documentation Map
 
@@ -18,6 +18,7 @@ This wiki is structured as a docs portal with the same depth expected in product
 
 - [Get Started](Get-Started)
 - [Overview](Overview)
+- [Architecture](Architecture)
 - [Storage Engine and Interface](Storage-Engine-and-Interface)
 - [Partitioning and Distribution Strategy](Partitioning-and-Distribution-Strategy)
 

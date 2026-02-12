@@ -5,6 +5,7 @@ const NAV = [
       ["Home", "Home"],
       ["Get Started", "Get-Started"],
       ["Overview", "Overview"],
+      ["Architecture", "Architecture"],
     ],
   },
   {
