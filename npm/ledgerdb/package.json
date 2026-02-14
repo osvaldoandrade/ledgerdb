@@ -1,0 +1,31 @@
+{
+  "name": "@osvaldoandrade/ledgerdb",
+  "version": "0.0.0-dev",
+  "description": "LedgerDB CLI (installs a prebuilt Go binary from GitHub Releases)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osvaldoandrade/ledgerdb.git",
+    "directory": "npm/ledgerdb"
+  },
+  "bugs": {
+    "url": "https://github.com/osvaldoandrade/ledgerdb/issues"
+  },
+  "homepage": "https://github.com/osvaldoandrade/ledgerdb#readme",
+  "bin": {
+    "ledgerdb": "bin/ledgerdb"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+

@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+'use strict';
+
+const { spawnSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const ext = process.platform === 'win32' ? '.exe' : '';
+const binPath = path.join(__dirname, `ledgerdb-bin${ext}`);
+
+try {
+  fs.accessSync(binPath, fs.constants.X_OK);
+} catch {
+  console.error('ledgerdb: binary is missing. Try reinstalling the package.');
+  process.exit(1);
+}
+
+const res = spawnSync(binPath, process.argv.slice(2), { stdio: 'inherit' });
+if (res.error) {
+  console.error(`ledgerdb: failed to run binary: ${res.error.message}`);
+  process.exit(1);
+}
+process.exit(res.status == null ? 1 : res.status);
+

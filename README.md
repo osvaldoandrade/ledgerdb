@@ -15,6 +15,22 @@ This document serves as the **Master Specification**, outlining the system's arc
 
 ## 2. Get Started (CLI)
 
+### Install
+
+```bash
+# macOS / Linux / Windows (Git Bash): build from source and install into your PATH
+curl -fsSL https://raw.githubusercontent.com/osvaldoandrade/ledgerdb/main/install.sh | sh
+
+# npm (downloads a prebuilt binary from GitHub Releases)
+npm i -g @osvaldoandrade/ledgerdb@latest
+```
+
+Installer knobs:
+- `LEDGERDB_REF`: git ref (branch/tag/commit), default `main`
+- `LEDGERDB_BIN_DIR`: install directory (defaults to first writable dir on `PATH`)
+- `LEDGERDB_BIN_NAME`: installed binary name (defaults to detected `./cmd/<name>`)
+- `LEDGERDB_PKG`: Go package to build (defaults to auto-detect under `./cmd`)
+
 ```bash
 # Build the CLI
 make build

@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+
+# Local build artifacts
+build/
+dist/
+tmp/
+
+# Node.js
+npm/**/node_modules/
+npm/**/bin/*-bin
+npm/**/bin/*-bin.exe
+
