@@ -1,0 +1,94 @@
+# =============================================================================
+# Sample backup workflow for LedgerDB
+# =============================================================================
+#
+# This file is a SAMPLE/EXAMPLE workflow. It is intentionally named with the
+# `.example` suffix so GitHub Actions does NOT execute it automatically.
+#
+# To activate this workflow in your own repository:
+#   1. Copy this file to `.github/workflows/backup.yml` (remove the .example
+#      suffix).
+#   2. Configure the required GitHub Actions secrets (see below).
+#   3. Customize the cron schedule and the destination bucket / object key.
+#   4. Adjust the retention policy in your S3 bucket (lifecycle rules) or
+#      replace the `aws s3 cp` step with the storage backend of your choice.
+#
+# Required secrets:
+#   - AWS_ROLE_ARN          : IAM role ARN that GitHub Actions assumes via OIDC.
+#   - AWS_REGION            : AWS region (e.g. us-east-1).
+#   - BACKUP_S3_BUCKET      : Name of the destination S3 bucket.
+#
+# Retention policy hint:
+#   Configure S3 lifecycle rules (e.g. transition to Glacier after 30 days,
+#   expire after 365 days) rather than deleting objects from this workflow.
+#
+# See also:
+#   - docs/REPLICATION_HA.md  (replication & HA guidance)
+#
+# =============================================================================
+
+name: backup
+
+on:
+  schedule:
+    # 03:00 UTC daily
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write  # required for AWS OIDC role assumption
+
+jobs:
+  backup:
+    name: Nightly backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install ledgerdb (latest release)
+        run: |
+          set -euo pipefail
+          BASE_URL="https://github.com/osvaldoandrade/ledgerdb/releases/latest/download"
+          ASSET="ledgerdb-linux-amd64"
+          curl -fsSL -o ledgerdb "${BASE_URL}/${ASSET}"
+          install -m 0755 ledgerdb /usr/local/bin/ledgerdb
+          ledgerdb version
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create backup archive
+        id: backup
+        run: |
+          set -euo pipefail
+          BACKUP_FILE="backup-$(date -u +%Y%m%dT%H%M%S).tar.gz"
+          ledgerdb backup -o "${BACKUP_FILE}"
+          echo "file=${BACKUP_FILE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload backup to S3
+        run: |
+          set -euo pipefail
+          aws s3 cp "${{ steps.backup.outputs.file }}" \
+            "s3://${{ secrets.BACKUP_S3_BUCKET }}/ledgerdb/${{ steps.backup.outputs.file }}"
+
+      - name: Verify integrity (deep)
+        run: ledgerdb integrity verify --deep
+
+      - name: Cleanup local backup file
+        if: always()
+        run: |
+          rm -f "${{ steps.backup.outputs.file }}" || true
