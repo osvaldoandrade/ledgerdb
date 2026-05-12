@@ -1,0 +1,80 @@
+name: Epic
+description: A multi-task body of work spanning several PRs. Maintainer use mostly.
+title: "epic: <short summary>"
+labels: ["epic", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Epics are large bodies of work that span multiple pull requests
+        and usually multiple releases. They are listed in
+        [`ROADMAP.md`](/osvaldoandrade/ledgerdb/blob/main/ROADMAP.md) and act as the parent
+        issue for a set of child tasks.
+
+        Use the **task** template for the individual pieces of work.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Strategic problem
+      description: |
+        What is the underlying problem this epic addresses? Why does it
+        matter for LedgerDB users, operators, or the project's path to
+        v1.0? Reference any relevant ADRs under `docs/`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals
+      description: |
+        What this epic intends to achieve. Use bullets. Be specific
+        enough that we can tell when each item is done.
+      placeholder: |
+        - Stream sidecar metrics over OTLP when an opt-in flag is set.
+        - Document the metric names and their semantics.
+        - Add an integration test that asserts the watcher emits at
+          least one metric per batch.
+    validations:
+      required: true
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: |
+        Just as important — what is **out of scope** for this epic? This
+        helps prevent scope creep and keeps the work shippable.
+      placeholder: |
+        - Building our own metric backend.
+        - Changing the storage engine to record metrics in-band.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Child tasks
+      description: |
+        A placeholder list of child tasks that will hang off this epic.
+        Use a GitHub checklist so they can be checked off as they land.
+        Link each child task issue once it is filed.
+      value: |
+        - [ ] #TODO design ADR under `docs/`
+        - [ ] #TODO scaffold opt-in flag plumbing
+        - [ ] #TODO integration test
+        - [ ] #TODO docs + release-notes entry
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: |
+        How will we know this epic is done? List concrete, testable
+        criteria. "Feels faster" does not belong here; "p99 catch-up
+        latency under 2s on the 50k-doc bench" does.
+    validations:
+      required: true

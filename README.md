@@ -273,3 +273,15 @@ Standardization for language-specific implementations (Go, Node.js, Rust).
 
 * **Blob Storage:** Handling large binary assets (images/PDFs) via `git-lfs` integration.
 * **Archive Nodes:** Strategies for "Cold Storage" and history truncation (pruning).
+
+---
+
+## 14. Release cadence
+
+LedgerDB ships on a predictable, low-ceremony cadence:
+
+* **Minor releases (0.x → 0.(x+1))** target the **first Tuesday of each month**. They bundle the features and fixes that landed on `main` since the previous minor. If the first Tuesday falls on a holiday or the release pipeline is unhealthy, the release slips to the next business day rather than cutting from a broken state.
+* **Patch releases (0.x.y → 0.x.(y+1))** are cut on demand for bug fixes and security patches between minors. There is no fixed schedule — when a fix needs to ship, it ships.
+* Releases are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml). The workflow builds the CLI for all supported platforms, attaches binaries to a GitHub Release, and updates the npm package [`@osvaldoandrade/ledgerdb`](https://www.npmjs.com/package/@osvaldoandrade/ledgerdb) automatically so the `npm i -g` install path stays current with each tag.
+* **Pre-v1.0 caveat:** while we are in the 0.x series, minor releases may include breaking changes. See [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) for the full v1.0 stability contract, the surfaces that will be frozen, and the surfaces that remain mutable. Once v1.0 is tagged, LedgerDB adopts strict semantic versioning.
+* The full list of active epics and their target releases lives in [`ROADMAP.md`](ROADMAP.md).
