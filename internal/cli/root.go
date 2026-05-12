@@ -78,6 +78,8 @@ func newRootCmd() *cobra.Command {
 		newInspectCmd(opts),
 		newMaintenanceCmd(opts),
 		newIntegrityCmd(opts),
+		newStatsCmd(opts),
+		newDiffCmd(opts),
 	)
 
 	return cmd
