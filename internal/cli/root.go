@@ -46,7 +46,8 @@ func newRootCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if cmd.Name() == "init" || cmd.Name() == "clone" {
+			switch cmd.Name() {
+			case "init", "clone", "restore":
 				return nil
 			}
 			manifest, err := gitrepo.LoadManifest(opts.RepoPath)
@@ -82,6 +83,9 @@ func newRootCmd() *cobra.Command {
 		newIntegrityCmd(opts),
 		newStatsCmd(opts),
 		newDiffCmd(opts),
+		newBackupCmd(opts),
+		newRestoreCmd(opts),
+		newTruncateCmd(opts),
 	)
 
 	return cmd

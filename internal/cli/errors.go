@@ -8,6 +8,7 @@ import (
 
 	collectionapp "github.com/osvaldoandrade/ledgerdb/internal/app/collection"
 	docapp "github.com/osvaldoandrade/ledgerdb/internal/app/doc"
+	drapp "github.com/osvaldoandrade/ledgerdb/internal/app/dr"
 	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
 	inspectapp "github.com/osvaldoandrade/ledgerdb/internal/app/inspect"
 	maintenanceapp "github.com/osvaldoandrade/ledgerdb/internal/app/maintenance"
@@ -66,7 +67,8 @@ func NormalizeError(err error) ExitError {
 	case errors.Is(err, domain.ErrHeadChanged),
 		errors.Is(err, domain.ErrSyncConflict),
 		errors.Is(err, indexapp.ErrCommitNotFound),
-		errors.Is(err, indexapp.ErrMissingDocument):
+		errors.Is(err, indexapp.ErrMissingDocument),
+		errors.Is(err, drapp.ErrIntegrityFailed):
 		return ExitError{Code: ExitConflict, Kind: KindConflict, Err: err}
 	case errors.Is(err, paths.ErrRepoPathRequired),
 		errors.Is(err, repoapp.ErrRepoURLRequired),
@@ -103,7 +105,11 @@ func NormalizeError(err error) ExitError {
 		errors.Is(err, migrateapp.ErrTargetNotFound),
 		errors.Is(err, migrateapp.ErrAppliedMissing),
 		errors.Is(err, ErrScaffoldFileExists),
-		errors.Is(err, ErrInvalidScaffoldName):
+		errors.Is(err, ErrInvalidScaffoldName),
+		errors.Is(err, drapp.ErrInvalidBackup),
+		errors.Is(err, drapp.ErrTruncateThresholdRequired),
+		errors.Is(err, drapp.ErrTruncateConfirmation),
+		errors.Is(err, drapp.ErrInvalidThreshold):
 		return ExitError{Code: ExitInvalid, Kind: KindValidation, Err: err}
 	default:
 		return ExitError{Code: ExitInternal, Kind: KindInternal, Err: err}
