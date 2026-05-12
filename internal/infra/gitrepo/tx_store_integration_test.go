@@ -148,7 +148,7 @@ func TestReadBlob(t *testing.T) {
 	}
 }
 
-func writeTx(t *testing.T, ctx context.Context, store *Store, repoPath string, tx domain.Transaction) (string, string, []byte) {
+func writeTx(t testing.TB, ctx context.Context, store *Store, repoPath string, tx domain.Transaction) (string, string, []byte) {
 	t.Helper()
 
 	encoder := txv3.Encoder{}

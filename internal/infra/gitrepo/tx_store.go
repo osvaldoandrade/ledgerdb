@@ -32,6 +32,11 @@ const (
 	casBackoffBase = 25 * time.Millisecond
 )
 
+// casRetryHook is a test-only telemetry hook fired each time the CAS loop
+// retries because refs/heads/main moved between baseRef read and SetReference.
+// It is nil in production (zero overhead) and only set by tests.
+var casRetryHook func(attempt int)
+
 func (s *Store) LoadStreamHead(ctx context.Context, repoPath, streamPath string) (string, error) {
 	if err := ctx.Err(); err != nil {
 		return "", err
@@ -180,6 +185,9 @@ func (s *Store) PutTx(ctx context.Context, write doc.TxWrite) (doc.PutResult, er
 		newRef := plumbing.NewHashReference(refName, commitHash)
 		if err := repo.Storer.CheckAndSetReference(newRef, baseRef); err != nil {
 			if errors.Is(err, storage.ErrReferenceHasChanged) {
+				if hook := casRetryHook; hook != nil {
+					hook(attempt)
+				}
 				if attempt == casMaxRetries-1 {
 					return doc.PutResult{}, domain.ErrHeadChanged
 				}
