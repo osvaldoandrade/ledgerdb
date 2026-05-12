@@ -11,6 +11,7 @@ import (
 	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
 	inspectapp "github.com/osvaldoandrade/ledgerdb/internal/app/inspect"
 	maintenanceapp "github.com/osvaldoandrade/ledgerdb/internal/app/maintenance"
+	migrateapp "github.com/osvaldoandrade/ledgerdb/internal/app/migrate"
 	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
 	repoapp "github.com/osvaldoandrade/ledgerdb/internal/app/repo"
 	statsapp "github.com/osvaldoandrade/ledgerdb/internal/app/stats"
@@ -97,7 +98,12 @@ func NormalizeError(err error) ExitError {
 		errors.Is(err, domain.ErrInvalidOp),
 		errors.Is(err, domain.ErrMissingPayload),
 		errors.Is(err, domain.ErrUnexpectedPayload),
-		errors.Is(err, domain.ErrMultiplePayloads):
+		errors.Is(err, domain.ErrMultiplePayloads),
+		errors.Is(err, migrateapp.ErrInvalidMigrationName),
+		errors.Is(err, migrateapp.ErrTargetNotFound),
+		errors.Is(err, migrateapp.ErrAppliedMissing),
+		errors.Is(err, ErrScaffoldFileExists),
+		errors.Is(err, ErrInvalidScaffoldName):
 		return ExitError{Code: ExitInvalid, Kind: KindValidation, Err: err}
 	default:
 		return ExitError{Code: ExitInternal, Kind: KindInternal, Err: err}

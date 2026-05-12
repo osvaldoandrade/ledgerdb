@@ -73,6 +73,8 @@ func newRootCmd() *cobra.Command {
 		newStatusCmd(opts),
 		newPushCmd(opts),
 		newCollectionCmd(opts),
+		newSchemaCmd(opts),
+		newMigrateCmd(opts),
 		newDocCmd(opts),
 		newIndexCmd(opts),
 		newInspectCmd(opts),
