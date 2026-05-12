@@ -37,6 +37,11 @@ func renderManifest(manifest domain.Manifest) string {
 		builder.WriteString(createdAt)
 		builder.WriteString("\n")
 	}
+	if len(manifest.AppliedMigrations) > 0 {
+		builder.WriteString("applied_migrations: ")
+		builder.WriteString(strings.Join(manifest.AppliedMigrations, ","))
+		builder.WriteString("\n")
+	}
 	return builder.String()
 }
 
@@ -88,6 +93,19 @@ func parseManifest(data []byte) (domain.Manifest, error) {
 				return domain.Manifest{}, fmt.Errorf("parse manifest created_at: %w", err)
 			}
 			manifest.CreatedAt = parsed.UTC()
+		case "applied_migrations":
+			if value == "" {
+				continue
+			}
+			parts := strings.Split(value, ",")
+			migrations := make([]string, 0, len(parts))
+			for _, part := range parts {
+				name := strings.TrimSpace(part)
+				if name != "" {
+					migrations = append(migrations, name)
+				}
+			}
+			manifest.AppliedMigrations = migrations
 		}
 	}
 
