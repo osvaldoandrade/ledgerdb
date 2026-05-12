@@ -1,0 +1,91 @@
+# Nightly + on-demand benchmark workflow for ledgerdb.
+#
+# Runs `go test -bench=.` across the repo every night at 04:00 UTC, on manual
+# dispatch, and on pull requests that touch performance-sensitive paths
+# (`bench/**` and `internal/infra/gitrepo/**`). Results are captured to
+# `bench-results.txt`, appended to the job summary, and uploaded as a 90-day
+# artifact for offline inspection.
+#
+# When a `bench-baseline.txt` artifact exists from a prior run, the workflow
+# downloads it and runs `benchstat` for a best-effort regression check. The
+# whole compare step is allowed to fail without failing the job.
+#
+# Publishing trend graphs to gh-pages is deferred for now — this workflow is
+# artifact-only. See issue #30 for the broader benchmark dashboard rollout.
+
+name: bench
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'bench/**'
+      - 'internal/infra/gitrepo/**'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run benchmarks
+        run: |
+          go test -bench=. -benchmem -benchtime=2s -run='^$' -count=3 ./... > bench-results.txt 2>&1 || true
+
+      - name: Append results to job summary
+        run: |
+          {
+            echo '## Benchmark results'
+            echo ''
+            echo '```'
+            cat bench-results.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload bench-results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: bench-results.txt
+          retention-days: 90
+
+      - name: Download baseline artifact (best-effort)
+        id: download-baseline
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: bench-baseline
+          path: .
+
+      - name: Install benchstat (best-effort)
+        if: steps.download-baseline.outcome == 'success'
+        continue-on-error: true
+        run: go install golang.org/x/perf/cmd/benchstat@latest
+
+      - name: Compare against baseline (best-effort)
+        if: steps.download-baseline.outcome == 'success'
+        continue-on-error: true
+        run: |
+          {
+            echo ''
+            echo '## benchstat vs baseline'
+            echo ''
+            echo '```'
+            benchstat bench-baseline.txt bench-results.txt || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
