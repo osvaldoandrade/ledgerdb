@@ -13,6 +13,7 @@ import (
 	maintenanceapp "github.com/osvaldoandrade/ledgerdb/internal/app/maintenance"
 	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
 	repoapp "github.com/osvaldoandrade/ledgerdb/internal/app/repo"
+	statsapp "github.com/osvaldoandrade/ledgerdb/internal/app/stats"
 	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
@@ -87,6 +88,8 @@ func NormalizeError(err error) ExitError {
 		errors.Is(err, indexapp.ErrPatchUnsupported),
 		errors.Is(err, indexapp.ErrInvalidInterval),
 		errors.Is(err, indexapp.ErrInvalidJitter),
+		errors.Is(err, statsapp.ErrRefRequired),
+		errors.Is(err, statsapp.ErrInvalidLimit),
 		errors.Is(err, domain.ErrTxIDRequired),
 		errors.Is(err, domain.ErrTimestampRequired),
 		errors.Is(err, domain.ErrCollectionRequired),
