@@ -440,6 +440,10 @@ func newIndexWatchCmd(opts *RootOptions) *cobra.Command {
 	var batchCommits int
 	var fast bool
 	var mode string
+	var metricsAddr string
+	var metricsAllowPublic bool
+	var auditLogPath string
+	var auditFlushInterval time.Duration
 	cmd := &cobra.Command{
 		Use:   "watch",
 		Short: "Continuously sync the SQLite index",
@@ -476,6 +480,55 @@ func newIndexWatchCmd(opts *RootOptions) *cobra.Command {
 				jsonpatch.Patcher{},
 				hash.SHA256{},
 			).WithIndexSpecReader(gitStore)
+
+			var metrics *indexapp.Metrics
+			if strings.TrimSpace(metricsAddr) != "" {
+				metrics = indexapp.NewMetrics()
+				addr, stopMetrics, err := metrics.RunServer(cmd.Context(), indexapp.ServerConfig{
+					Addr:        metricsAddr,
+					AllowPublic: metricsAllowPublic,
+				}, func(err error) {
+					fmt.Fprintf(cmd.ErrOrStderr(), "metrics server error: %v\n", err)
+				})
+				if err != nil {
+					return err
+				}
+				defer func() {
+					_ = stopMetrics()
+				}()
+				if !quiet {
+					fmt.Fprintf(cmd.ErrOrStderr(), "metrics: serving /metrics on %s\n", addr)
+				}
+			}
+
+			var audit *indexapp.AuditLogger
+			if strings.TrimSpace(auditLogPath) != "" {
+				audit, err = indexapp.NewAuditLogger(indexapp.AuditOptions{
+					Path:          auditLogPath,
+					FlushInterval: auditFlushInterval,
+				})
+				if err != nil {
+					return err
+				}
+				audit.Start(cmd.Context(), auditFlushInterval)
+				defer func() {
+					_ = audit.Close()
+				}()
+			}
+
+			// Build the observer list explicitly: a typed-nil *Metrics or
+			// *AuditLogger wrapped into an Observer interface compares != nil
+			// and would crash on the first callback.
+			var observers []indexapp.Observer
+			if metrics != nil {
+				observers = append(observers, metrics)
+			}
+			if audit != nil {
+				observers = append(observers, audit)
+			}
+			if observer := indexapp.NewCombinedObserver(observers...); observer != nil {
+				service.SetObserver(observer)
+			}
 
 			rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 			spin := spinnerEnabled(cmd.ErrOrStderr(), opts.JSONOutput) && !quiet
@@ -529,6 +582,10 @@ func newIndexWatchCmd(opts *RootOptions) *cobra.Command {
 	cmd.Flags().IntVar(&batchCommits, "batch-commits", 1, "Commits per SQLite transaction (>=1)")
 	cmd.Flags().BoolVar(&fast, "fast", false, "Relax SQLite durability for faster indexing")
 	cmd.Flags().StringVar(&mode, "mode", string(indexapp.ModeState), "Index source (history, state)")
+	cmd.Flags().StringVar(&metricsAddr, "metrics-addr", "", "Bind Prometheus /metrics on host:port (use 'auto' for 127.0.0.1:9090). Empty disables metrics.")
+	cmd.Flags().BoolVar(&metricsAllowPublic, "metrics-allow-public", false, "Allow binding the metrics endpoint to a non-loopback host (off by default).")
+	cmd.Flags().StringVar(&auditLogPath, "audit-log", "", "Append JSON Lines audit records to the given path ('-' for stdout). Empty disables the audit log.")
+	cmd.Flags().DurationVar(&auditFlushInterval, "audit-flush-interval", time.Second, "Interval between buffered audit-log flushes.")
 	if err := cmd.MarkFlagRequired("db"); err != nil {
 		return cmd
 	}
