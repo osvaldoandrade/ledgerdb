@@ -86,6 +86,8 @@ func newRootCmd() *cobra.Command {
 		newBackupCmd(opts),
 		newRestoreCmd(opts),
 		newTruncateCmd(opts),
+		newQueryCmd(opts),
+		newReplCmd(opts),
 	)
 
 	return cmd
