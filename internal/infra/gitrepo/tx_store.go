@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"os/exec"
 	"path"
@@ -252,7 +253,8 @@ func loadBaseTree(repo *git.Repository, refName plumbing.ReferenceName) (*plumbi
 }
 
 func sleepWithBackoff(ctx context.Context, attempt int) error {
-	delay := casBackoffBase * time.Duration(1<<attempt)
+	// Full jitter (AWS pattern): sleep ∈ [0, base<<attempt) reduces thundering-herd retry collisions.
+	delay := jitteredBackoff(attempt)
 	timer := time.NewTimer(delay)
 	defer timer.Stop()
 	select {
@@ -261,6 +263,14 @@ func sleepWithBackoff(ctx context.Context, attempt int) error {
 	case <-timer.C:
 		return nil
 	}
+}
+
+func jitteredBackoff(attempt int) time.Duration {
+	maxDelay := int64(casBackoffBase) << attempt
+	if maxDelay <= 0 {
+		return casBackoffBase
+	}
+	return time.Duration(rand.Int64N(maxDelay))
 }
 
 func readTreeFile(tree *object.Tree, filePath string) ([]byte, error) {
