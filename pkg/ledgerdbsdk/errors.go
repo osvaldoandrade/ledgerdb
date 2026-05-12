@@ -8,4 +8,6 @@ var (
 	ErrWatchRunning     = errors.New("ledgerdb-sdk: index watch already running")
 	ErrNotFound         = errors.New("ledgerdb-sdk: document not found")
 	ErrManifestMismatch = errors.New("ledgerdb-sdk: config does not match repository manifest")
+	ErrInvalidCursor    = errors.New("ledgerdb-sdk: invalid cursor")
+	ErrMissingOrderBy   = errors.New("ledgerdb-sdk: paginated query must include ORDER BY")
 )

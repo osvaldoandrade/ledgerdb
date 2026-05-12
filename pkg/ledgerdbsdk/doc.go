@@ -41,6 +41,18 @@ type LogEntry struct {
 	Op         string
 }
 
+// LogPage is a cursor-paginated slice of a document's log.
+type LogPage struct {
+	Entries    []LogEntry
+	NextCursor string
+}
+
+// LogOptions configures cursor-based pagination of the document log.
+type LogOptions struct {
+	Limit  int
+	Cursor string
+}
+
 type RevertOptions struct {
 	TxID   string
 	TxHash string
@@ -200,15 +212,42 @@ func (c *Client) Log(ctx context.Context, collection, docID string) ([]LogEntry,
 	}
 	out := make([]LogEntry, 0, len(entries))
 	for _, entry := range entries {
-		out = append(out, LogEntry{
-			TxID:       entry.TxID,
-			TxHash:     entry.TxHash,
-			ParentHash: entry.ParentHash,
-			Timestamp:  entry.Timestamp,
-			Op:         entry.Op.String(),
-		})
+		out = append(out, toSDKLogEntry(entry))
 	}
 	return out, nil
+}
+
+// LogPaginated returns a cursor-paginated slice of a document's log.
+//
+// The cursor is opaque (base64(JSON)). Pass an empty cursor to start at the
+// head; on each page, feed the returned NextCursor back in until it is empty.
+func (c *Client) LogPaginated(ctx context.Context, collection, docID string, opts LogOptions) (LogPage, error) {
+	service := docapp.NewLogService(c.store, txv3.Decoder{}, hash.SHA256{}, c.layout)
+	page, err := service.LogPaginated(ctx, c.cfg.RepoPath, collection, docID, docapp.LogOptions{
+		Limit:  opts.Limit,
+		Cursor: opts.Cursor,
+	})
+	if err != nil {
+		return LogPage{}, mapDocErr(err)
+	}
+	out := LogPage{
+		Entries:    make([]LogEntry, 0, len(page.Entries)),
+		NextCursor: page.NextCursor,
+	}
+	for _, entry := range page.Entries {
+		out.Entries = append(out.Entries, toSDKLogEntry(entry))
+	}
+	return out, nil
+}
+
+func toSDKLogEntry(entry docapp.LogEntry) LogEntry {
+	return LogEntry{
+		TxID:       entry.TxID,
+		TxHash:     entry.TxHash,
+		ParentHash: entry.ParentHash,
+		Timestamp:  entry.Timestamp,
+		Op:         entry.Op.String(),
+	}
 }
 
 // Fetch pulls remote updates into the local repo.
@@ -245,6 +284,9 @@ func mapDocErr(err error) error {
 	}
 	if errors.Is(err, docapp.ErrDocNotFound) {
 		return ErrNotFound
+	}
+	if errors.Is(err, docapp.ErrInvalidCursor) {
+		return ErrInvalidCursor
 	}
 	return err
 }

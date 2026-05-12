@@ -3,6 +3,7 @@ package ledgerdbsdk
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -77,6 +78,136 @@ func (c *Client) Query(ctx context.Context, query string, args ...any) (*sql.Row
 		return nil, err
 	}
 	return db.QueryContext(ctx, query, args...)
+}
+
+// QueryCursorVersion is the current schema version of paginated-query cursors.
+const QueryCursorVersion = 1
+
+// DefaultQueryPageLimit is the page size used by QueryPaginated when limit <= 0.
+const DefaultQueryPageLimit = 100
+
+// QueryRow is a single materialized row returned by QueryPaginated. Keys are
+// the column names from the query.
+type QueryRow map[string]any
+
+type queryCursor struct {
+	Version int `json:"v"`
+	Offset  int `json:"off"`
+}
+
+// QueryPaginated runs a SQL query with cursor-based pagination.
+//
+// Constraints:
+//   - query MUST include an ORDER BY clause so that pages are stable across
+//     calls; otherwise SQLite is free to return rows in any order. The check is
+//     a best-effort textual scan.
+//   - query MUST NOT include its own LIMIT/OFFSET; QueryPaginated appends them.
+//
+// The cursor is opaque (base64-encoded JSON). Pass "" to read the first page;
+// when the returned nextCursor is empty there are no more rows.
+//
+// Rows are materialized into memory because pagination already implies bounded
+// page size. Use Query() for streaming reads when you do not need pagination.
+func (c *Client) QueryPaginated(ctx context.Context, query string, args []any, cursor string, limit int) ([]QueryRow, string, error) {
+	db, err := c.indexDB()
+	if err != nil {
+		return nil, "", err
+	}
+	if !hasOrderBy(query) {
+		return nil, "", ErrMissingOrderBy
+	}
+	if limit <= 0 {
+		limit = DefaultQueryPageLimit
+	}
+
+	offset := 0
+	if cursor != "" {
+		decoded, err := decodeQueryCursor(cursor)
+		if err != nil {
+			return nil, "", err
+		}
+		offset = decoded.Offset
+	}
+
+	// Request one extra row so we can detect whether more pages exist without
+	// running a separate count.
+	paged := strings.TrimRight(strings.TrimSpace(query), ";")
+	paged = fmt.Sprintf("%s LIMIT %d OFFSET %d", paged, limit+1, offset)
+
+	rows, err := db.QueryContext(ctx, paged, args...)
+	if err != nil {
+		return nil, "", err
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return nil, "", err
+	}
+
+	out := make([]QueryRow, 0, limit)
+	hasMore := false
+	for rows.Next() {
+		if len(out) >= limit {
+			hasMore = true
+			break
+		}
+		raw := make([]any, len(cols))
+		ptrs := make([]any, len(cols))
+		for i := range raw {
+			ptrs[i] = &raw[i]
+		}
+		if err := rows.Scan(ptrs...); err != nil {
+			return nil, "", err
+		}
+		row := make(QueryRow, len(cols))
+		for i, name := range cols {
+			row[name] = raw[i]
+		}
+		out = append(out, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, "", err
+	}
+
+	nextCursor := ""
+	if hasMore {
+		nextCursor = encodeQueryCursor(offset + limit)
+	}
+	return out, nextCursor, nil
+}
+
+// hasOrderBy is a best-effort textual check that the query contains an ORDER BY
+// clause. It does not attempt to parse SQL.
+func hasOrderBy(query string) bool {
+	upper := strings.ToUpper(query)
+	return strings.Contains(upper, "ORDER BY")
+}
+
+func encodeQueryCursor(offset int) string {
+	raw, err := json.Marshal(queryCursor{Version: QueryCursorVersion, Offset: offset})
+	if err != nil {
+		return ""
+	}
+	return base64.RawURLEncoding.EncodeToString(raw)
+}
+
+func decodeQueryCursor(token string) (queryCursor, error) {
+	raw, err := base64.RawURLEncoding.DecodeString(token)
+	if err != nil {
+		return queryCursor{}, fmt.Errorf("%w: %v", ErrInvalidCursor, err)
+	}
+	var c queryCursor
+	if err := json.Unmarshal(raw, &c); err != nil {
+		return queryCursor{}, fmt.Errorf("%w: %v", ErrInvalidCursor, err)
+	}
+	if c.Version != QueryCursorVersion {
+		return queryCursor{}, fmt.Errorf("%w: unsupported version %d", ErrInvalidCursor, c.Version)
+	}
+	if c.Offset < 0 {
+		return queryCursor{}, fmt.Errorf("%w: negative offset", ErrInvalidCursor)
+	}
+	return c, nil
 }
 
 // GetIndexed reads a document from the SQLite sidecar (key-value path).
