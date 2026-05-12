@@ -327,19 +327,27 @@ func newDocRevertCmd(opts *RootOptions) *cobra.Command {
 }
 
 func newDocLogCmd(opts *RootOptions) *cobra.Command {
-	return &cobra.Command{
+	var limit int
+	var cursor string
+	cmd := &cobra.Command{
 		Use:   "log <collection> <doc_id>",
 		Short: "Show document history",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			service := docapp.NewLogService(newGitStore(opts), txv3.Decoder{}, hash.SHA256{}, opts.StreamLayout)
-			entries, err := service.Log(cmd.Context(), opts.RepoPath, args[0], args[1])
+			page, err := service.LogPaginated(cmd.Context(), opts.RepoPath, args[0], args[1], docapp.LogOptions{
+				Limit:  limit,
+				Cursor: cursor,
+			})
 			if err != nil {
 				return err
 			}
-			return writeLogResult(cmd, entries, opts.JSONOutput)
+			return writeLogPage(cmd, page, opts.JSONOutput)
 		},
 	}
+	cmd.Flags().IntVar(&limit, "limit", docapp.DefaultLogPageLimit, "Maximum entries per page")
+	cmd.Flags().StringVar(&cursor, "cursor", "", "Opaque cursor returned by a previous page")
+	return cmd
 }
 
 func newIndexCmd(opts *RootOptions) *cobra.Command {
@@ -687,7 +695,8 @@ type getOutput struct {
 }
 
 type logOutput struct {
-	Entries []logEntryOutput `json:"entries"`
+	Entries    []logEntryOutput `json:"entries"`
+	NextCursor string           `json:"next_cursor,omitempty"`
 }
 
 type logEntryOutput struct {
@@ -895,11 +904,14 @@ func writeGetResult(cmd *cobra.Command, result docapp.GetResult, asJSON bool) er
 	return nil
 }
 
-func writeLogResult(cmd *cobra.Command, entries []docapp.LogEntry, asJSON bool) error {
+func writeLogPage(cmd *cobra.Command, page docapp.LogPage, asJSON bool) error {
 	out := cmd.OutOrStdout()
 	if asJSON {
-		payload := logOutput{Entries: make([]logEntryOutput, 0, len(entries))}
-		for _, entry := range entries {
+		payload := logOutput{
+			Entries:    make([]logEntryOutput, 0, len(page.Entries)),
+			NextCursor: page.NextCursor,
+		}
+		for _, entry := range page.Entries {
 			payload.Entries = append(payload.Entries, logEntryOutput{
 				TxHash:     entry.TxHash,
 				TxID:       entry.TxID,
@@ -914,9 +926,14 @@ func writeLogResult(cmd *cobra.Command, entries []docapp.LogEntry, asJSON bool) 
 	}
 
 	ui := newRenderer(out, asJSON)
-	for _, entry := range entries {
+	for _, entry := range page.Entries {
 		op := colorOp(ui, entry.Op.String())
 		if _, err := fmt.Fprintf(out, "%s %s %s %d %s\n", entry.TxHash, entry.TxID, entry.ParentHash, entry.Timestamp, op); err != nil {
+			return err
+		}
+	}
+	if page.NextCursor != "" {
+		if _, err := fmt.Fprintf(out, "%s %s\n", ui.dim("next-cursor:"), page.NextCursor); err != nil {
 			return err
 		}
 	}
