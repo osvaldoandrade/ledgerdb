@@ -17,6 +17,13 @@ type CommitSource interface {
 	StateTxsSince(ctx context.Context, repoPath string, state State) (StateTxsResult, error)
 }
 
+// IndexSpecReader loads the materialization specs for a collection from
+// the repository working tree. Implementations should return (nil, nil)
+// when no spec is declared.
+type IndexSpecReader interface {
+	ReadCollectionIndexes(ctx context.Context, repoPath, collection string) ([]domain.IndexSpec, error)
+}
+
 type Store interface {
 	GetState(ctx context.Context) (State, error)
 	Begin(ctx context.Context) (StoreTx, error)
@@ -25,6 +32,7 @@ type Store interface {
 
 type StoreTx interface {
 	EnsureCollection(ctx context.Context, collection string) (string, error)
+	EnsureIndexes(ctx context.Context, collection string, specs []domain.IndexSpec) error
 	GetDoc(ctx context.Context, collection, docID string) (DocRecord, bool, error)
 	UpsertDoc(ctx context.Context, collection string, record DocRecord) error
 	SetState(ctx context.Context, state State) error

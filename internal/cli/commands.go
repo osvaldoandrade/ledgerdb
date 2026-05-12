@@ -126,14 +126,17 @@ func newCollectionApplyCmd(opts *RootOptions) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			store := newGitStore(opts)
 			service := collectionapp.NewService(store, filesystem.SchemaSource{}, schema.JSONSchemaValidator{})
-			parsedIndexes := parseCommaList(indexes)
+			parsedIndexes, err := collectionapp.ParseIndexSpecs(indexes)
+			if err != nil {
+				return err
+			}
 			return runWithAutoSync(cmd, opts, store, func() error {
 				return service.Apply(cmd.Context(), opts.RepoPath, args[0], schemaPath, parsedIndexes)
 			})
 		},
 	}
 	cmd.Flags().StringVar(&schemaPath, "schema", "", "Path to JSON schema")
-	cmd.Flags().StringVar(&indexes, "indexes", "", "Comma-separated index fields")
+	cmd.Flags().StringVar(&indexes, "indexes", "", "Index fields: comma-separated names or JSON array of {name,fields[],unique?}")
 	if err := cmd.MarkFlagRequired("schema"); err != nil {
 		return cmd
 	}
@@ -394,7 +397,7 @@ func newIndexSyncCmd(opts *RootOptions) *cobra.Command {
 				txv3.Decoder{},
 				jsonpatch.Patcher{},
 				hash.SHA256{},
-			)
+			).WithIndexSpecReader(gitStore)
 
 			var result indexapp.SyncResult
 			spin := spinnerEnabled(cmd.ErrOrStderr(), opts.JSONOutput)
@@ -472,7 +475,7 @@ func newIndexWatchCmd(opts *RootOptions) *cobra.Command {
 				txv3.Decoder{},
 				jsonpatch.Patcher{},
 				hash.SHA256{},
-			)
+			).WithIndexSpecReader(gitStore)
 
 			rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 			spin := spinnerEnabled(cmd.ErrOrStderr(), opts.JSONOutput) && !quiet
@@ -1258,17 +1261,6 @@ func rawJSON(data []byte) json.RawMessage {
 		return nil
 	}
 	return json.RawMessage(data)
-}
-
-func parseCommaList(value string) []string {
-	if strings.TrimSpace(value) == "" {
-		return nil
-	}
-	parts := strings.Split(value, ",")
-	for i := range parts {
-		parts[i] = strings.TrimSpace(parts[i])
-	}
-	return parts
 }
 
 func readJSONInput(label, inline, filePath string) ([]byte, error) {

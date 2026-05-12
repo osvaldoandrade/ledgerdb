@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/osvaldoandrade/ledgerdb/internal/app/paths"
@@ -27,7 +26,7 @@ func NewService(store Store, source SchemaSource, validator SchemaValidator) *Se
 	}
 }
 
-func (s *Service) Apply(ctx context.Context, repoPath, collection, schemaPath string, indexes []string) error {
+func (s *Service) Apply(ctx context.Context, repoPath, collection, schemaPath string, indexes []domain.IndexSpec) error {
 	collection = strings.TrimSpace(collection)
 	if collection == "" {
 		return ErrCollectionRequired
@@ -67,25 +66,10 @@ func (s *Service) Apply(ctx context.Context, repoPath, collection, schemaPath st
 		}
 	}
 
-	indexes = normalizeIndexes(indexes)
-
-	return s.store.WriteSchema(ctx, absRepoPath, collection, schema, indexes)
-}
-
-func normalizeIndexes(indexes []string) []string {
-	seen := make(map[string]struct{})
-	var normalized []string
-	for _, item := range indexes {
-		item = strings.TrimSpace(item)
-		if item == "" {
-			continue
-		}
-		if _, exists := seen[item]; exists {
-			continue
-		}
-		seen[item] = struct{}{}
-		normalized = append(normalized, item)
+	normalized, err := NormalizeIndexSpecs(indexes)
+	if err != nil {
+		return err
 	}
-	sort.Strings(normalized)
-	return normalized
+
+	return s.store.WriteSchema(ctx, absRepoPath, collection, schema, normalized)
 }
