@@ -1,5 +1,11 @@
 # Client SDK Specifications
 
+> **See also:** Per-language SDK documentation lives in [`docs/sdk/`](./sdk/) —
+> [Go](./sdk/go.md), [TypeScript](./sdk/typescript.md),
+> [Python](./sdk/python.md) (planned), [Rust](./sdk/rust.md) (planned),
+> [Java](./sdk/java.md) (planned). This document is the conformance contract
+> every SDK must implement.
+
 ## 1. Abstract
 
 In the LedgerDB architecture, the "Database Server" is effectively a passive file server (the Git Repository). All database intelligence—concurrency control, schema validation, transaction serialization, and index management—resides in the **Client SDK**. This document specifies the requirements for implementing a compliant LedgerDB SDK in any target language (Go, Node.js, Rust, Python), ensuring uniform behavior across ecosystems.
