@@ -31,7 +31,7 @@ var migrationFilePattern = regexp.MustCompile(`^([0-9]{4,})_([A-Za-z0-9][A-Za-z0
 
 // CollectionApplier executes a single migration step (collection apply).
 type CollectionApplier interface {
-	Apply(ctx context.Context, repoPath, collection, schemaPath string, indexes []string) error
+	Apply(ctx context.Context, repoPath, collection, schemaPath string, indexes []domain.IndexSpec) error
 }
 
 // ManifestStore reads and writes the repository manifest.
@@ -213,7 +213,16 @@ func (s *Service) applyOne(ctx context.Context, repoPath string, m Migration) er
 		return fmt.Errorf("close temp schema: %w", err)
 	}
 
-	return s.applier.Apply(ctx, repoPath, collection, tmpPath, payload.Indexes)
+	specs := make([]domain.IndexSpec, 0, len(payload.Indexes))
+	for _, field := range payload.Indexes {
+		field = strings.TrimSpace(field)
+		if field == "" {
+			continue
+		}
+		specs = append(specs, domain.IndexSpec{Name: field, Fields: []string{field}})
+	}
+
+	return s.applier.Apply(ctx, repoPath, collection, tmpPath, specs)
 }
 
 func discoverMigrations(repoPath string) ([]Migration, error) {

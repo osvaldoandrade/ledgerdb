@@ -3,6 +3,7 @@ package index
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/osvaldoandrade/ledgerdb/internal/domain"
@@ -44,12 +45,16 @@ func (f fakeSource) StateTxsSince(ctx context.Context, repoPath string, state St
 type memStore struct {
 	state       State
 	collections map[string]map[string]DocRecord
+	indexes     map[string][]domain.IndexSpec
 	resetCalled bool
 	beginCount  int
 }
 
 func newMemStore() *memStore {
-	return &memStore{collections: make(map[string]map[string]DocRecord)}
+	return &memStore{
+		collections: make(map[string]map[string]DocRecord),
+		indexes:     make(map[string][]domain.IndexSpec),
+	}
 }
 
 func (m *memStore) GetState(ctx context.Context) (State, error) {
@@ -64,6 +69,7 @@ func (m *memStore) Begin(ctx context.Context) (StoreTx, error) {
 func (m *memStore) Reset(ctx context.Context) error {
 	m.state = State{}
 	m.collections = make(map[string]map[string]DocRecord)
+	m.indexes = make(map[string][]domain.IndexSpec)
 	m.resetCalled = true
 	return nil
 }
@@ -77,6 +83,11 @@ func (m *memStoreTx) EnsureCollection(ctx context.Context, collection string) (s
 		m.store.collections[collection] = make(map[string]DocRecord)
 	}
 	return collection, nil
+}
+
+func (m *memStoreTx) EnsureIndexes(ctx context.Context, collection string, specs []domain.IndexSpec) error {
+	m.store.indexes[collection] = append([]domain.IndexSpec(nil), specs...)
+	return nil
 }
 
 func (m *memStoreTx) GetDoc(ctx context.Context, collection, docID string) (DocRecord, bool, error) {
@@ -481,5 +492,80 @@ func TestSyncServiceBatchesCommits(t *testing.T) {
 	}
 	if store.state.LastCommit != "c3" {
 		t.Fatalf("expected last commit to be c3, got %s", store.state.LastCommit)
+	}
+}
+
+type stubSpecReader struct {
+	specs map[string][]domain.IndexSpec
+	calls int
+}
+
+func (s *stubSpecReader) ReadCollectionIndexes(ctx context.Context, repoPath, collection string) ([]domain.IndexSpec, error) {
+	s.calls++
+	return s.specs[collection], nil
+}
+
+func TestSyncServiceMaterializesCompositeIndexes(t *testing.T) {
+	store := newMemStore()
+	source := fakeSource{
+		commits: []string{"c1"},
+		txs: map[string][]CommitTx{
+			"c1": {
+				{Bytes: []byte("tx1")},
+				{Bytes: []byte("tx2")},
+			},
+		},
+	}
+	decoder := mapDecoder{
+		txs: map[string]domain.Transaction{
+			"tx1": {
+				TxID:       "tx1",
+				Timestamp:  1,
+				Collection: "users",
+				DocID:      "u1",
+				Op:         domain.TxOpPut,
+				Snapshot:   []byte(`{"a":1}`),
+			},
+			"tx2": {
+				TxID:       "tx2",
+				Timestamp:  2,
+				Collection: "users",
+				DocID:      "u2",
+				Op:         domain.TxOpPut,
+				Snapshot:   []byte(`{"a":2}`),
+			},
+		},
+	}
+	reader := &stubSpecReader{specs: map[string][]domain.IndexSpec{
+		"users": {
+			{Name: "by_email", Fields: []string{"email"}, Unique: true},
+			{Name: "by_org_status", Fields: []string{"org_id", "status"}},
+		},
+	}}
+
+	service := NewSyncService(
+		nil,
+		source,
+		store,
+		passCanonicalizer{},
+		decoder,
+		fakePatcher{},
+		testHasher{},
+	).WithIndexSpecReader(reader)
+
+	if _, err := service.Sync(context.Background(), "repo", SyncOptions{Fetch: false}); err != nil {
+		t.Fatalf("sync failed: %v", err)
+	}
+
+	got := store.indexes["users"]
+	want := []domain.IndexSpec{
+		{Name: "by_email", Fields: []string{"email"}, Unique: true},
+		{Name: "by_org_status", Fields: []string{"org_id", "status"}},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("expected %v, got %v", want, got)
+	}
+	if reader.calls != 1 {
+		t.Fatalf("expected reader to be called once per collection per batch, got %d", reader.calls)
 	}
 }

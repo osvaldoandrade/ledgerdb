@@ -17,11 +17,11 @@ type fakeApplier struct {
 
 type applyCall struct {
 	collection string
-	indexes    []string
+	indexes    []domain.IndexSpec
 }
 
-func (f *fakeApplier) Apply(_ context.Context, _, collection, _ string, indexes []string) error {
-	f.calls = append(f.calls, applyCall{collection: collection, indexes: append([]string(nil), indexes...)})
+func (f *fakeApplier) Apply(_ context.Context, _, collection, _ string, indexes []domain.IndexSpec) error {
+	f.calls = append(f.calls, applyCall{collection: collection, indexes: append([]domain.IndexSpec(nil), indexes...)})
 	return f.err
 }
 
@@ -89,7 +89,8 @@ func TestApplyRunsInOrderAndUpdatesManifest(t *testing.T) {
 	if len(applier.calls) != 2 || applier.calls[0].collection != "users" || applier.calls[1].collection != "orders" {
 		t.Fatalf("applier calls: %+v", applier.calls)
 	}
-	if len(applier.calls[0].indexes) != 1 || applier.calls[0].indexes[0] != "id" {
+	if len(applier.calls[0].indexes) != 1 || applier.calls[0].indexes[0].Name != "id" ||
+		len(applier.calls[0].indexes[0].Fields) != 1 || applier.calls[0].indexes[0].Fields[0] != "id" {
 		t.Fatalf("indexes not forwarded: %+v", applier.calls[0].indexes)
 	}
 	if manifest.writes != 2 {

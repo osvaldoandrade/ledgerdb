@@ -3,7 +3,10 @@ package collection
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
+
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
 
 type fakeSchemaSource struct {
@@ -18,11 +21,11 @@ func (f *fakeSchemaSource) ReadSchema(ctx context.Context, path string) ([]byte,
 type fakeCollectionStore struct {
 	collection string
 	schema     []byte
-	indexes    []string
+	indexes    []domain.IndexSpec
 	err        error
 }
 
-func (f *fakeCollectionStore) WriteSchema(ctx context.Context, repoPath, collection string, schema []byte, indexes []string) error {
+func (f *fakeCollectionStore) WriteSchema(ctx context.Context, repoPath, collection string, schema []byte, indexes []domain.IndexSpec) error {
 	f.collection = collection
 	f.schema = schema
 	f.indexes = indexes
@@ -72,19 +75,40 @@ func TestServiceValidatesJSON(t *testing.T) {
 func TestServiceNormalizesIndexes(t *testing.T) {
 	store := &fakeCollectionStore{}
 	service := NewService(store, &fakeSchemaSource{data: []byte(`{"type":"object"}`)}, fakeSchemaValidator{})
-	err := service.Apply(context.Background(), "repo", "users", "schema.json", []string{" email", "", "role", "email"})
+	err := service.Apply(context.Background(), "repo", "users", "schema.json", []domain.IndexSpec{
+		{Name: " ", Fields: []string{"email"}},
+		{Name: "role", Fields: []string{"role"}},
+		{Name: "email", Fields: []string{"email"}},
+	})
 	if err != nil {
 		t.Fatalf("Apply returned error: %v", err)
 	}
 
-	expected := []string{"email", "role"}
-	if len(store.indexes) != len(expected) {
+	expected := []domain.IndexSpec{
+		{Name: "email", Fields: []string{"email"}},
+		{Name: "role", Fields: []string{"role"}},
+	}
+	if !reflect.DeepEqual(store.indexes, expected) {
 		t.Fatalf("expected %v, got %v", expected, store.indexes)
 	}
-	for i, value := range expected {
-		if store.indexes[i] != value {
-			t.Fatalf("expected %v, got %v", expected, store.indexes)
-		}
+}
+
+func TestServiceAcceptsCompositeUnique(t *testing.T) {
+	store := &fakeCollectionStore{}
+	service := NewService(store, &fakeSchemaSource{data: []byte(`{"type":"object"}`)}, fakeSchemaValidator{})
+	err := service.Apply(context.Background(), "repo", "users", "schema.json", []domain.IndexSpec{
+		{Name: "by_email", Fields: []string{"email"}, Unique: true},
+		{Name: "by_org_status", Fields: []string{"org_id", "status"}},
+	})
+	if err != nil {
+		t.Fatalf("Apply returned error: %v", err)
+	}
+	expected := []domain.IndexSpec{
+		{Name: "by_email", Fields: []string{"email"}, Unique: true},
+		{Name: "by_org_status", Fields: []string{"org_id", "status"}},
+	}
+	if !reflect.DeepEqual(store.indexes, expected) {
+		t.Fatalf("expected %v, got %v", expected, store.indexes)
 	}
 }
 

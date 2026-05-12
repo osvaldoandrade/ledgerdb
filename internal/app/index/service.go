@@ -16,6 +16,7 @@ type SyncService struct {
 	decoder       Decoder
 	patcher       Patcher
 	hasher        Hasher
+	specReader    IndexSpecReader
 }
 
 func NewSyncService(fetcher Fetcher, source CommitSource, store Store, canonicalizer Canonicalizer, decoder Decoder, patcher Patcher, hasher Hasher) *SyncService {
@@ -28,6 +29,14 @@ func NewSyncService(fetcher Fetcher, source CommitSource, store Store, canonical
 		patcher:       patcher,
 		hasher:        hasher,
 	}
+}
+
+// WithIndexSpecReader registers an optional reader used to materialize
+// secondary indexes during sync. When unset, no secondary indexes are
+// emitted.
+func (s *SyncService) WithIndexSpecReader(reader IndexSpecReader) *SyncService {
+	s.specReader = reader
+	return s
 }
 
 func (s *SyncService) Sync(ctx context.Context, repoPath string, opts SyncOptions) (SyncResult, error) {
@@ -121,7 +130,7 @@ func (s *SyncService) syncHistory(ctx context.Context, repoPath string, opts Syn
 				return result, err
 			}
 
-			if err := s.applyTxs(ctx, storeTx, decoded, collections, &result); err != nil {
+			if err := s.applyTxs(ctx, repoPath, storeTx, decoded, collections, &result); err != nil {
 				_ = storeTx.Rollback()
 				return result, err
 			}
@@ -194,7 +203,7 @@ func (s *SyncService) syncState(ctx context.Context, repoPath string, opts SyncO
 			return result, err
 		}
 
-		if err := s.applyTxs(ctx, storeTx, decoded, collections, &result); err != nil {
+		if err := s.applyTxs(ctx, repoPath, storeTx, decoded, collections, &result); err != nil {
 			_ = storeTx.Rollback()
 			return result, err
 		}
@@ -246,13 +255,18 @@ func (s *SyncService) decodeTxs(blobs []CommitTx) ([]decodedTx, error) {
 	return decoded, nil
 }
 
-func (s *SyncService) applyTxs(ctx context.Context, storeTx StoreTx, txs []decodedTx, collections map[string]struct{}, result *SyncResult) error {
+func (s *SyncService) applyTxs(ctx context.Context, repoPath string, storeTx StoreTx, txs []decodedTx, collections map[string]struct{}, result *SyncResult) error {
 	for _, item := range txs {
 		tx := item.Tx
 		if _, err := storeTx.EnsureCollection(ctx, tx.Collection); err != nil {
 			return err
 		}
-		collections[tx.Collection] = struct{}{}
+		if _, seen := collections[tx.Collection]; !seen {
+			if err := s.materializeIndexes(ctx, repoPath, storeTx, tx.Collection); err != nil {
+				return err
+			}
+			collections[tx.Collection] = struct{}{}
+		}
 
 		switch tx.Op {
 		case domain.TxOpPut:
@@ -348,6 +362,20 @@ func (s *SyncService) newRecord(tx domain.Transaction, txBytes []byte, payload [
 		UpdatedAt:     tx.Timestamp,
 		Deleted:       deleted,
 	}
+}
+
+func (s *SyncService) materializeIndexes(ctx context.Context, repoPath string, storeTx StoreTx, collection string) error {
+	if s.specReader == nil {
+		return nil
+	}
+	specs, err := s.specReader.ReadCollectionIndexes(ctx, repoPath, collection)
+	if err != nil {
+		return err
+	}
+	if len(specs) == 0 {
+		return nil
+	}
+	return storeTx.EnsureIndexes(ctx, collection, specs)
 }
 
 func (s *SyncService) ensureDeps() error {

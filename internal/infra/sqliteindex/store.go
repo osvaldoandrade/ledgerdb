@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	indexapp "github.com/osvaldoandrade/ledgerdb/internal/app/index"
+	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 	_ "modernc.org/sqlite"
 )
 
@@ -233,6 +234,64 @@ func (s *Store) applyPragmas(ctx context.Context, opts OpenOptions) error {
 type storeTx struct {
 	tx         *sql.Tx
 	tableCache map[string]string
+}
+
+func (s *storeTx) EnsureIndexes(ctx context.Context, collection string, specs []domain.IndexSpec) error {
+	if len(specs) == 0 {
+		return nil
+	}
+	tableName, err := s.lookupCollection(ctx, collection)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("collection not initialized: %s", collection)
+		}
+		return fmt.Errorf("lookup collection: %w", err)
+	}
+	for _, spec := range specs {
+		stmt, err := buildIndexStatement(tableName, spec)
+		if err != nil {
+			return err
+		}
+		if _, err := s.tx.ExecContext(ctx, stmt); err != nil {
+			return fmt.Errorf("create index %s: %w", spec.Name, err)
+		}
+	}
+	return nil
+}
+
+func buildIndexStatement(tableName string, spec domain.IndexSpec) (string, error) {
+	if strings.TrimSpace(spec.Name) == "" {
+		return "", fmt.Errorf("index name is required")
+	}
+	if len(spec.Fields) == 0 {
+		return "", fmt.Errorf("index %s has no fields", spec.Name)
+	}
+	indexName := indexNameForCollection(tableName, spec.Name)
+	exprs := make([]string, 0, len(spec.Fields))
+	for _, field := range spec.Fields {
+		if strings.TrimSpace(field) == "" {
+			return "", fmt.Errorf("index %s has empty field", spec.Name)
+		}
+		exprs = append(exprs, fmt.Sprintf("json_extract(payload, %s)", quoteLiteral("$."+field)))
+	}
+	unique := ""
+	if spec.Unique {
+		unique = "UNIQUE "
+	}
+	return fmt.Sprintf("CREATE %sINDEX IF NOT EXISTS %s ON %s (%s)",
+		unique,
+		quoteIdent(indexName),
+		quoteIdent(tableName),
+		strings.Join(exprs, ", "),
+	), nil
+}
+
+func indexNameForCollection(tableName, indexName string) string {
+	return "idx_" + tableName + "_" + indexName
+}
+
+func quoteLiteral(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "''") + "'"
 }
 
 func (s *storeTx) EnsureCollection(ctx context.Context, collection string) (string, error) {
