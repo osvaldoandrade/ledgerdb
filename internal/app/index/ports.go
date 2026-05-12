@@ -55,3 +55,21 @@ type Patcher interface {
 type Hasher interface {
 	SumHex(data []byte) string
 }
+
+// TxEvent describes a single transaction applied during a sync. It is emitted
+// to Observers attached via SyncService.SetObserver.
+type TxEvent struct {
+	TxID       string
+	Collection string
+	DocID      string
+	Op         string
+}
+
+// Observer receives lifecycle callbacks from a SyncService. Implementations
+// must not block — callbacks fire inside the sync loop.
+type Observer interface {
+	OnTxApplied(event TxEvent)
+	OnSyncError(collection, reason string)
+	OnSyncDuration(seconds float64)
+	OnReplicationFetch(commitsObserved int)
+}

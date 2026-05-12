@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"time"
 
 	"github.com/osvaldoandrade/ledgerdb/internal/domain"
 )
@@ -17,6 +18,14 @@ type SyncService struct {
 	patcher       Patcher
 	hasher        Hasher
 	specReader    IndexSpecReader
+	observer      Observer
+}
+
+// SetObserver registers an Observer to receive per-tx and per-sync
+// notifications. Passing nil disables observation. Must be called before
+// invoking Sync from multiple goroutines.
+func (s *SyncService) SetObserver(observer Observer) {
+	s.observer = observer
 }
 
 func NewSyncService(fetcher Fetcher, source CommitSource, store Store, canonicalizer Canonicalizer, decoder Decoder, patcher Patcher, hasher Hasher) *SyncService {
@@ -40,6 +49,20 @@ func (s *SyncService) WithIndexSpecReader(reader IndexSpecReader) *SyncService {
 }
 
 func (s *SyncService) Sync(ctx context.Context, repoPath string, opts SyncOptions) (SyncResult, error) {
+	start := time.Now()
+	result, err := s.syncInternal(ctx, repoPath, opts)
+	if s.observer != nil {
+		s.observer.OnSyncDuration(time.Since(start).Seconds())
+		if err != nil {
+			s.observer.OnSyncError("", classifyErr(err))
+		} else if opts.Fetch {
+			s.observer.OnReplicationFetch(result.Commits)
+		}
+	}
+	return result, err
+}
+
+func (s *SyncService) syncInternal(ctx context.Context, repoPath string, opts SyncOptions) (SyncResult, error) {
 	if err := s.ensureDeps(); err != nil {
 		return SyncResult{}, err
 	}
@@ -65,6 +88,31 @@ func (s *SyncService) Sync(ctx context.Context, repoPath string, opts SyncOption
 	}
 
 	return s.syncHistory(ctx, repoPath, opts)
+}
+
+// classifyErr returns a short, low-cardinality reason for use as a Prometheus
+// label. Unknown errors are bucketed as "other" to avoid label explosion.
+func classifyErr(err error) string {
+	switch {
+	case err == nil:
+		return ""
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		return "canceled"
+	case errors.Is(err, ErrCommitNotFound):
+		return "commit_not_found"
+	case errors.Is(err, ErrFetchUnavailable):
+		return "fetch_unavailable"
+	case errors.Is(err, ErrMissingDocument):
+		return "missing_document"
+	case errors.Is(err, ErrPatchUnsupported):
+		return "patch_unsupported"
+	case errors.Is(err, ErrStateUnavailable):
+		return "state_unavailable"
+	case errors.Is(err, ErrMergeCommitUnsupported):
+		return "merge_unsupported"
+	default:
+		return "other"
+	}
 }
 
 func (s *SyncService) syncHistory(ctx context.Context, repoPath string, opts SyncOptions) (SyncResult, error) {
@@ -307,6 +355,15 @@ func (s *SyncService) applyTxs(ctx context.Context, repoPath string, storeTx Sto
 			result.DocsDeleted++
 		default:
 			return domain.ErrInvalidOp
+		}
+
+		if s.observer != nil {
+			s.observer.OnTxApplied(TxEvent{
+				TxID:       tx.TxID,
+				Collection: tx.Collection,
+				DocID:      tx.DocID,
+				Op:         tx.Op.String(),
+			})
 		}
 	}
 	return nil
