@@ -1,0 +1,62 @@
+name: Feature request
+description: Suggest a new capability or improvement for LedgerDB.
+title: "feat: <short summary>"
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an idea. Feature requests work best when they
+        start with a concrete problem rather than a specific solution — it
+        gives us more room to find the right design together.
+
+        Before opening, please skim [`ROADMAP.md`](/osvaldoandrade/ledgerdb/blob/main/ROADMAP.md)
+        and the open issues to see whether the feature is already tracked
+        under an existing epic.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: |
+        What problem are you trying to solve? Who is affected? What
+        workaround (if any) are you using today, and why is it
+        unsatisfactory?
+      placeholder: |
+        When I run `ledgerdb index watch` against a repo with 50k docs,
+        the watcher takes 30+ seconds to catch up after a burst of
+        writes, which makes the local dashboard feel laggy...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed solution
+      description: |
+        A description of what you would like LedgerDB to do. Concrete is
+        better than abstract — sketch the flag, command, or SDK method
+        you have in mind, even if it is not the final shape.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        What else did you consider? Workarounds you tried, external
+        tools that almost solve it, designs that were tempting but you
+        rejected. This helps avoid retreading ground in review.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Would you be willing to implement this?
+      description: Entirely optional — this does not affect prioritisation.
+      options:
+        - label: I am willing to send a pull request for this
+        - label: I am willing to help review a PR for this
+        - label: I would like a maintainer to pick this up

@@ -1,0 +1,13 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions, ideas, and general discussion
+    url: https://github.com/osvaldoandrade/ledgerdb/discussions
+    about: |
+      For open-ended questions ("is this the right approach?"), design
+      conversations, or anything that is not yet a concrete bug, feature,
+      or task — please start a GitHub Discussion instead of an issue.
+  - name: Security vulnerabilities
+    url: https://github.com/osvaldoandrade/ledgerdb/blob/main/SECURITY.md
+    about: |
+      Please do NOT file public issues for security bugs. Follow the
+      coordinated-disclosure process in SECURITY.md.

@@ -1,0 +1,73 @@
+name: Task
+description: A scoped, implementation-ready piece of work, usually hanging off an epic.
+title: "task: <short summary>"
+labels: ["task", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tasks are the unit of work an individual PR can close. If your
+        task does not fit in one or two focused PRs, it is probably an
+        epic — use the epic template instead and break this down.
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent epic
+      description: |
+        The epic (or umbrella issue) this task belongs to. Format:
+        `#NNN`. Leave blank for standalone work.
+      placeholder: "#77"
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: |
+        What exactly should this task do? Be concrete and bounded. If
+        you find yourself listing more than five top-level items, split
+        the task.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: |
+        A short checklist that defines "done" for this task. Reviewers
+        will use this to evaluate the PR that closes the task.
+      value: |
+        - [ ] Implementation lands behind tests
+        - [ ] Docs updated (if user-visible)
+        - [ ] Release notes entry drafted (if user-visible)
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: File pointers
+      description: |
+        Which packages and files are likely to be touched? This is a
+        starter list — the implementer may discover more. Helps
+        reviewers map the task to the repo layout.
+      placeholder: |
+        - `internal/cli/index_watch.go`
+        - `internal/app/indexsync/`
+        - `tests/index-watch.sh`
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Implementation notes
+      description: |
+        Optional. Constraints, gotchas, related ADRs, prior art in
+        other projects, or open questions the implementer should think
+        about before writing code.
+    validations:
+      required: false

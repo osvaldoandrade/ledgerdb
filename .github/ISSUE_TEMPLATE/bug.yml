@@ -1,0 +1,85 @@
+name: Bug report
+description: Something in LedgerDB is broken or behaving incorrectly.
+title: "bug: <short summary>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in as
+        many fields as you can — the more we know up front, the faster we
+        can reproduce and fix the issue.
+
+        **Security issues**: do not file them here. Follow
+        [`SECURITY.md`](/osvaldoandrade/ledgerdb/blob/main/SECURITY.md) instead.
+
+  - type: textarea
+    id: version
+    attributes:
+      label: LedgerDB version
+      description: |
+        Output of `ledgerdb --version` (or the git SHA if you built from
+        source). If you are using the Go SDK or the npm package, include
+        the package version as well.
+      placeholder: |
+        ledgerdb 0.2.3 (commit abcdef0, built 2025-01-15)
+        @osvaldoandrade/ledgerdb 0.2.3
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and architecture
+      description: e.g. macOS 14.4 (arm64), Ubuntu 22.04 (amd64), Windows 11 + Git Bash.
+      placeholder: Ubuntu 22.04 (amd64)
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: |
+        A minimal, copy-pasteable sequence of commands that reproduces
+        the problem on a fresh repo. If the bug involves a specific
+        document or schema, please include it inline or attach it.
+      placeholder: |
+        1. `ledgerdb init --name demo --repo ./demo.git --layout sharded --history-mode append`
+        2. `ledgerdb collection apply tasks --schema ./task.json`
+        3. `ledgerdb doc put tasks "t1" --payload '{"title":"x"}'`
+        4. ...
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: |
+        What actually happened? Include the exact error message, exit
+        code, or unexpected output.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional logs, screenshots, or context
+      description: |
+        Anything else that might help — `--log-level debug` output,
+        `ledgerdb integrity verify --deep` results, repository size, or
+        a link to a public repo that reproduces it. Please redact any
+        sensitive data.
+      render: shell
+    validations:
+      required: false
