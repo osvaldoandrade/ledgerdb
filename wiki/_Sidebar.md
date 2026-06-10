@@ -1,29 +1,48 @@
-# LedgerDB Docs
+## Get Started
+- [Overview](Get-Started-Overview)
+- [Run Locally](Get-Started-Run-Locally)
+- [Run With Sidecar Index](Get-Started-Run-With-Sidecar-Index)
+- [Run Distributed](Get-Started-Run-Distributed)
+- [Run In Docker](Get-Started-Run-In-Docker)
 
-## Start Here
-- [Get Started](Get-Started)
-- [Overview](Overview)
-- [Architecture](Architecture)
+## Concepts and Architecture
+- [Overview](Concepts-Overview)
+- [Documents and Collections](Concepts-Documents-And-Collections)
+- [Transactions and TxV3](Concepts-Transactions-And-TxV3)
+- [History Modes](Concepts-History-Modes)
+- [Storage Layout](Concepts-Storage-Layout)
+- [Versioning and Causality](Concepts-Versioning-And-Causality)
+- [Conflict Resolution](Concepts-Conflict-Resolution)
+- [Indexing](Concepts-Indexing)
+- [Integrity and Verification](Concepts-Integrity-And-Verification)
+- [Replication](Concepts-Replication)
+- [Architecture Overview](Concepts-Architecture-Overview)
 
-## Core Specs
-- [Storage Engine and Interface](Storage-Engine-and-Interface)
-- [Partitioning and Distribution Strategy](Partitioning-and-Distribution-Strategy)
-- [Versioning and Conflict Resolution](Versioning-and-Conflict-Resolution)
-- [Execution Model and Consistency](Execution-Model-and-Consistency)
-- [Querying and Indexing Strategy](Querying-and-Indexing-Strategy)
-- [Integrity and Security Strategy](Integrity-and-Security-Strategy)
-- [Replication and Synchronization Strategy](Replication-and-Synchronization-Strategy)
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy)
-- [Client SDK Specifications](Client-SDK-Specifications)
+## SDKs and CLI
+- [Overview](SDK-Overview)
+- [CLI Reference](SDK-CLI-Reference)
+- [Go SDK](SDK-Go-SDK)
+- [TypeScript SDK](SDK-TypeScript-SDK)
+- [REPL and Query Explain](SDK-REPL-And-Query-Explain)
 
-## Use Cases
-- [Use Cases](Use-Cases)
-- [Local Write and Commit](Use-Cases-Local-Write-and-Commit)
-- [Offline First Sync](Use-Cases-Offline-First-Sync)
-- [Indexed Query Read](Use-Cases-Indexed-Query-Read)
-- [Integrity Verification](Use-Cases-Integrity-Verification)
-- [Conflict Detection and Resolution](Use-Cases-Conflict-Detection-and-Resolution)
+## LedgerDB IO
+- [Overview](IO-Overview)
+- [TxV3 Format](IO-TxV3-Format)
+- [Git Object Layout](IO-Git-Object-Layout)
+- [State Tree](IO-State-Tree)
+- [SQLite Schema](IO-SQLite-Schema)
+- [Sync Protocol](IO-Sync-Protocol)
+- [Bundle Format](IO-Bundle-Format)
 
-## Operations
-- [CLI Reference](CLI-Reference)
-- [Troubleshooting](Troubleshooting)
+## Observability
+- [Overview](Observability-Overview)
+- [Logging](Observability-Logging)
+- [Metrics](Observability-Metrics)
+- [Audit Log](Observability-Audit-Log)
+
+## Performance
+- [Overview](Performance-Overview)
+- [Write Throughput](Performance-Write-Throughput)
+- [Read and Query](Performance-Read-And-Query)
+- [Tuning Knobs](Performance-Tuning-Knobs)
+- [Bench Harness](Performance-Bench-Harness)

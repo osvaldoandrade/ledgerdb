@@ -1,287 +1,200 @@
-# LedgerDB: Git-Native Distributed Database
+# LedgerDB
 
-## 1. Introduction & Vision 
+LedgerDB is a git-native immutable document database. It accepts JSON documents, serializes each write as a TxV3 protobuf blob, and commits the result to a bare git repository on local disk under optimistic concurrency control on `refs/heads/main`. The CLI is the primary surface; a Go SDK and a TypeScript SDK sit on top of the same core. A SQLite sidecar maintained by `ledgerdb index watch` projects the immutable commit log into per-collection tables so the same data is reachable through SQL. The substrate is a real git repository — `git log`, `git cat-file`, `git fetch`, and `git push` all work against it without modification — which means replication is whatever git already does, no consensus protocol, no service mesh, no broker.
 
-**LedgerDB** is a high-reliability, immutable document store built directly upon the Git object model. It bridges the gap between application versioning and data storage by treating database transactions as immutable blobs within a standard Git repository.
+That shape carries weight. There is no ledgerdb server process to run. There is no gRPC plane and no raft cluster. A multi-writer topology is a set of clones with a shared remote; merges are handled by the optimistic-concurrency layer the CLI ships with and, where automatic merging is insufficient, by the conflict-resolution helpers exposed in the SDK. Offline writes are the default — you commit locally and synchronize when you have a network. The cost model and the failure model are the cost model and the failure model of git, plus one SQLite file per replica that wants SQL access.
 
-Unlike traditional databases that manage opaque binary storage files, LedgerDB leverages the **Git Merkle DAG** to provide:
-* **Tamper-Evident History:** Every state change is cryptographically linked to its parent.
-* **Decentralized Replication:** Any clone of the repository is a valid read/write replica.
-* **Offline-First:** Writes can occur locally and be synchronized later via standard Git protocols.
+This README is the project front door. The wiki at [github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki) is the deep reference; this file aims to get you installed, get you writing your first document, and point you at the right wiki page for the next step.
 
-This document serves as the **Master Specification**, outlining the system's architecture and indexing the detailed technical specifications located in the `/docs` directory.
+## Read this README in order
 
----
+The sections below are arranged to be read top to bottom on a first pass. The "Quick paths" table is a shortcut for readers who already know what they want. The **Install** section explains the three supported install paths — the curl install script, the npm package, and `go install` — and what each one actually does. The **Quickstart** section walks through `ledgerdb init`, `collection apply`, `doc put`, `doc get`, and the optional `index watch` long-running process, with prose between commands explaining what is happening on disk. The **Architecture at a glance** section sketches the smart-client / dumb-storage split and links to the wiki's [Architecture Overview](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Architecture-Overview) for the deep version. The **Wiki and documentation** section is the map into the wiki and the design docs under `docs/`. The **Release cadence** section is the contract: when do you get a new minor, where does it land, and what does the pre-v1.0 caveat mean for breakage. The **License** and **Contributing** sections are pointers to the governance documents.
 
-## 2. Get Started (CLI)
+## Quick paths
 
-### Install
+| Intent | Start here |
+| --- | --- |
+| I want to install LedgerDB | [Install](#install) |
+| I want to write my first document | [Quickstart](#quickstart) |
+| I want SQL queries over my documents | Run `ledgerdb index watch` (see [Quickstart](#quickstart)) and read [Run With Sidecar Index](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-With-Sidecar-Index) |
+| I want multiple writers via git remotes | [Run Distributed](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-Distributed) |
+| I want a container | [Run In Docker](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-In-Docker) |
+| I want to understand the architecture | [Architecture Overview](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Architecture-Overview) |
+| I want the full CLI reference | [SDK CLI Reference](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-CLI-Reference) |
+| I want to embed LedgerDB in a Go service | [Go SDK](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-Go-SDK) |
+| I want to call LedgerDB from Node | [TypeScript SDK](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-TypeScript-SDK) |
+| I want to tune throughput | [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) and [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) |
+| I want the v1.0 stability contract | [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) |
 
-```bash
-# macOS / Linux / Windows (Git Bash): build from source and install into your PATH
+## Install
+
+There are three supported install paths. Each lands the same `ledgerdb` binary in your `PATH`; the difference is who builds it and where the bytes come from.
+
+### Path 1: curl the install script
+
+```sh
 curl -fsSL https://raw.githubusercontent.com/osvaldoandrade/ledgerdb/main/install.sh | sh
-
-# npm (downloads a prebuilt binary from GitHub Releases)
-npm i -g @osvaldoandrade/ledgerdb@latest
 ```
 
-Installer knobs:
-- `LEDGERDB_REF`: git ref (branch/tag/commit), default `main`
-- `LEDGERDB_BIN_DIR`: install directory (defaults to first writable dir on `PATH`)
-- `LEDGERDB_BIN_NAME`: installed binary name (defaults to detected `./cmd/<name>`)
-- `LEDGERDB_PKG`: Go package to build (defaults to auto-detect under `./cmd`)
+The script is the canonical install path on macOS, Linux, and Windows-via-Git-Bash. It detects your platform, downloads a prebuilt binary from the latest GitHub Release, and copies it into the first writable directory on `PATH`. The script honours a handful of environment variables for non-default deployments: `LEDGERDB_REF` selects a git ref other than `main` (useful for pinning to a specific tag), `LEDGERDB_BIN_DIR` overrides the install directory, `LEDGERDB_BIN_NAME` renames the binary, and `LEDGERDB_PKG` selects a Go package other than the default `./cmd/ledgerdb`. The script itself lives at `install.sh` in this repository; read it before piping to `sh` if your environment requires that.
 
-```bash
-# Build the CLI
-make build
+### Path 2: npm
 
-# Initialize a bare repo (recommended layout + history mode)
+```sh
+npm install -g @osvaldoandrade/ledgerdb
+```
+
+The npm package at [`@osvaldoandrade/ledgerdb`](https://www.npmjs.com/package/@osvaldoandrade/ledgerdb) is the same binary wrapped in a postinstall download script and a TypeScript shim. After the package installs, `npx ledgerdb` and `ledgerdb` (when installed with `-g`) both resolve to the downloaded binary. The npm path is also how the TypeScript SDK gets its CLI dependency: the SDK shells out to the binary the postinstall script downloaded. Two environment knobs are relevant. `LEDGERDB_BIN` points the wrapper at a preinstalled binary and skips the download. `LEDGERDB_SKIP_DOWNLOAD=1` does the same in CI environments where the download path is blocked. The wrapper source and the postinstall script live in `npm/` in this repository.
+
+### Path 3: build from source
+
+```sh
+go install github.com/osvaldoandrade/ledgerdb/cmd/ledgerdb@latest
+```
+
+Or, if you have the repository checked out:
+
+```sh
+make build      # produces ./build/ledgerdb
+make install    # copies to $PREFIX/bin (defaults to /usr/local or /opt/homebrew)
+```
+
+`go install` is the fastest path for contributors with a working Go toolchain. The pinned Go version is in `go.mod` (currently Go 1.25); the Makefile target builds both the CLI and the C-shared core library used by foreign-language SDKs, falling back to a static archive on platforms where shared mode is unsupported. The Makefile is the canonical source for build flags — read `Makefile` for the full target list, including `make build-core-shared` and the `PREFIX`/`BINDIR`/`LIBDIR` overrides for `make install`.
+
+### Verifying the install
+
+```sh
+ledgerdb --version
+ledgerdb --help
+```
+
+The first command prints the embedded build version; the second prints the command tree. If `ledgerdb` is not on your `PATH` after install, the most common cause is that `~/.local/bin` or `/opt/homebrew/bin` is not in your shell profile — fix the profile, not the install.
+
+## Quickstart
+
+The Quickstart creates a bare git repository, declares one collection with a schema and a couple of indexes, writes a document, reads it back, and (optionally) starts the SQLite sidecar so you can query the same document with SQL. Each step explains what is happening on disk so the commands stop being magic.
+
+### Step 1: Initialize a repository
+
+```sh
 ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode append
+```
 
-# Apply a collection schema (example)
-ledgerdb collection apply tasks --schema ./schemas/task.json --indexes "status,assignee"
+`init` creates a bare git repository at the path you give it and writes a manifest into the repository's `state/` tree. The manifest names the deployment, fixes the on-disk **layout** (`sharded` spreads documents across two levels of hex-prefix directories so no single directory grows past ~256 entries; `flat` keeps everything in one directory and is fine for collections under ten thousand documents), and fixes the **history mode** (`append` preserves every revision and is the right default for any audit-bound workload; `amend` rewrites the head commit on each update so only the latest state of each document remains reachable). Both choices are properties of the repository and survive every subsequent operation. The on-disk layout and the history-mode semantics are documented in detail at [Storage Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Storage-Layout) and [History Modes](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-History-Modes).
 
-# Write and read documents
+### Step 2: Declare a collection
+
+```sh
+ledgerdb collection apply tasks \
+  --schema ./schemas/task.json \
+  --indexes "status,assignee"
+```
+
+`collection apply` registers (or updates) a collection named `tasks` and binds an optional JSON Schema and an optional list of indexed fields to it. The schema is enforced on every subsequent `doc put` and `doc patch`; an index entry causes the SQLite sidecar to materialize that column on the per-collection table for fast equality and range queries. Composite indexes and unique constraints are supported — see [Indexing](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Indexing) for the syntax. The schema and index list are themselves stored in the manifest, so every replica that fetches your repository ends up with the same collection definition.
+
+### Step 3: Write and read documents
+
+```sh
 ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
 ledgerdb doc get tasks "task_0001"
-
-# Watch the SQLite sidecar index (state-based, O(changes))
-ledgerdb index watch --db ./index.db --mode state --interval 1s --fast --batch-commits 200
+ledgerdb doc patch tasks "task_0001" --ops '[{"op":"replace","path":"/status","value":"done"}]'
+ledgerdb doc log tasks "task_0001"
 ```
 
-**Notes**
-* **Sharded layout:** `--layout sharded` spreads documents across deep directories for stable filesystem performance.
-* **State mode indexing:** `--mode state` reads from `state/` and only applies changed docs. It is the recommended mode for near real-time indexing.
-* **History modes:** `append` preserves full audit history; `amend` keeps only the latest state per document.
+Each `doc put` validates the payload against the collection schema, serializes it into a TxV3 protobuf blob, writes the blob into the git object database, updates the relevant state-tree paths, and commits the result against `refs/heads/main` using compare-and-swap. If another writer raced you and won the CAS, the command retries with exponential backoff (the default policy is five retries; see [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) for the knobs). `doc get` reads the latest state directly from the state tree. `doc patch` applies an RFC 6902 JSON patch and writes a new transaction whose parent is the previous one — the chain is what makes the ledger verifiable. `doc log` walks that chain and prints every revision of the document. The TxV3 wire format and the on-disk layout are documented at [TxV3 Format](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-TxV3-Format) and [Git Object Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-Git-Object-Layout).
 
----
+By default, `doc put` and `doc patch` auto-fetch from `origin` before the CAS and auto-push after a successful commit. Pass `--sync=false` (or set `LEDGERDB_AUTO_SYNC=false`) to keep everything local; this is the right choice on a laptop with no remote configured. Commit signing is opt-in via `--sign` or `LEDGERDB_GIT_SIGN=1`, and follows your local git signing configuration — see [Integrity and Verification](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Integrity-And-Verification) for what signing actually buys you.
 
-## 3. Architecture Overview
+### Step 4 (optional): Attach the SQLite sidecar
 
-The system is architected as a "Smart Client, Dumb Storage" engine. The complexity of concurrency control, validation, and query execution resides in the client (CLI/SDK), while the storage layer is a pure, dumb Git Bare Repository.
+```sh
+ledgerdb index watch \
+  --db ./index.db \
+  --mode state \
+  --interval 1s \
+  --fast \
+  --batch-commits 200
+```
+
+`index watch` is the only long-running process LedgerDB ships. It polls the repository's commit log, applies new changes to a SQLite database at the path you give it, and (optionally) exposes Prometheus metrics and an audit log. Once it is running, you can query the same data through SQL:
+
+```sh
+sqlite3 ./index.db 'SELECT doc_id, payload FROM collection_tasks WHERE status = "done";'
+```
+
+The default mode (`--mode state`) reads from the state tree and applies only the documents that actually changed since the last pass, which is O(changes) rather than O(history). The other modes, the meaning of `--fast` and `--batch-commits`, and the tradeoff between replication lag and SQLite fsync cost are documented in [Run With Sidecar Index](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-With-Sidecar-Index) and in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) §4. The full SQLite schema and the rules for what is and is not a stable column are at [SQLite Schema](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-SQLite-Schema).
+
+### Step 5: The REPL
+
+For interactive exploration, `ledgerdb repl` opens a session that supports SQL queries, `doc get`/`doc log` shortcuts, and `query explain` for inspecting the SQLite query plan against your indexes. The REPL is documented at [REPL and Query Explain](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-REPL-And-Query-Explain).
+
+This is the entire happy path. Every other command — `integrity verify`, `inspect blob`, `maintenance gc`, `maintenance snapshot`, `backup`, `restore`, `truncate` — is documented in the [SDK CLI Reference](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-CLI-Reference).
+
+## Architecture at a glance
+
+LedgerDB is shaped as a **smart client, dumb storage** system. All correctness logic — schema validation, CAS retry, TxV3 serialization, conflict detection, integrity verification — lives in the client (the CLI binary, the Go SDK, or whatever speaks the same internal interface). The storage layer is a bare git repository with no custom hooks and no daemon. Reads walk the state tree directly; writes go through optimistic concurrency control on `refs/heads/main`. The SQLite sidecar is a downstream projection: it can be rebuilt from the repository at any time, and a corrupt sidecar is never a data-integrity event because the canonical bytes are in git.
 
 ```mermaid
-graph TD
-    Client[Client SDK / CLI] -->|Put/Patch| Logic[Logic Layer]
-    Logic -->|Validate| Schema[JSON Schema]
-    Logic -->|Serialize| TxV3[TxV3 Protobuf]
-    Logic -->|CAS| Git[Git Bare Repo]
-    Git -->|Replication| Remote[Remote Origin]
-```
----
+flowchart LR
+    CLI[ledgerdb CLI]
+    GoSDK[Go SDK<br/>pkg/ledgerdbsdk]
+    TSSDK[TypeScript SDK<br/>@osvaldoandrade/ledgerdb]
+    Core[Core services<br/>internal/app + internal/infra]
+    Git[(Bare git repo<br/>refs/heads/main)]
+    SQLite[(SQLite sidecar<br/>index.db)]
+    Remote[(Remote origin<br/>any git host)]
 
-## 4. The Storage Engine
-[`Storage Interface`](docs/01_STORAGE_INTERFACE.md)
-
-The storage layer is responsible for mapping logical keys to physical files without performance degradation.
-* **Log-Structured Merge (LSM) on Git:** We treat Git blobs as append-only logs. Data is never overwritten.
-* **Hierarchical Sharding:** Keys are hashed (SHA-256) and mapped to deep directory structures to ensure $O(1)$ file system access and prevent directory bloating.
-* **TxV3 Protocol:** A deterministic Protobuf binary format ensures that transaction hashes are reproducible and verifiable.
-
----
-
-## 5. Partitioning & Distribution Strategy
-[`Partitioning`](docs/02_PARTITIONING.md)
-
-To scale to millions of documents, LedgerDB uses a deterministic partitioning scheme.
-* **Content Addressing:** The location of a document is mathematically determined by its key, eliminating the need for a central lookup table.
-* **Node Independence:** Since partitioning is algorithmic, any client can locate any data segment without coordination.
-
----
-
-## 6. Data Versioning & Causality
-[`Versioning`](docs/03_VERSIONING.md)
-
-LedgerDB abandons "Wall-Clock Time" in favor of **Causal History**.
-* **Merkle DAG:** Transactions form a Directed Acyclic Graph. A write is valid only if it references the correct parent hash.
-* **Branching:** Concurrent writes creates branches (divergent histories).
-* **Semantic Merging:** The system supports CRDT-inspired merging strategies for JSON documents to resolve branches automatically where possible.
-
----
-
-## 7. Execution Model: The Write Path
-[`Execution`](docs/04_Execution.md)
-
-High availability for writes is achieved through **Optimistic Concurrency Control**.
-* **Compare-and-Swap (CAS):** We utilize OS-level atomic operations on the `refs/heads/main` file to serialize writes.
-* **No Global Locks:** Writers do not block readers. Contention is handled via retries (Exponential Backoff) at the client level.
-* **Durability:** The `fsync` of Git objects precedes the reference update, guaranteeing no data loss on crash.
-
----
-
-## 8. Querying & Indexing
-[`Querying`](docs/05_QUERYING.md)
-
-
-While the primary access pattern is Key-Value, LedgerDB supports secondary indexing.
-* **Materialized Views:** Indexes are derived views of the immutable ledger.
-* **External Indexers:** Because the ledger is open, external systems (like Elasticsearch or SQLite) can tail the Git log to build rich, queryable projections without affecting write performance.
-* **SQLite Sidecar:** `ledgerdb index sync --db ./index.db` materializes per-collection tables for local querying (`--batch-commits`, `--fast`, `--mode` reduce SQLite overhead).
-* **Polling:** `ledgerdb index watch --db ./index.db --interval 5s` keeps the index fresh (`--only-changes`, `--once`, `--jitter`, `--quiet`, `--batch-commits`, `--fast`, `--mode` are available).
-
----
-
-## 9. Integrity & Security
-[`Integrity`](docs/06_INTEGRITY.md)
-
-Security is built-in, not bolted on.
-* **Cryptographic Chaining:** A `VERIFY` operation recomputes the hash of every transaction from Genesis to Head. Any bit-rot or tampering breaks the chain.
-* **Signed Commits:** Support for GPG/SSH signing of commits ensures non-repudiation of writes.
-
----
-
-## 10. Replication & Synchronization
-[`Replication`](docs/07_REPLICATION.md)
-
-LedgerDB delegates replication to the robust Git protocol.
-* **Push/Pull:** Nodes synchronize via standard `git fetch` and `git push`.
-* **Eventual Consistency:** The system is CP (Consistent/Partition-tolerant) during a write to a single master, but AP (Available/Partition-tolerant) across the distributed mesh.
-
----
-
-## 11. Operational Tooling (CLI)
-[`Ops`](docs/08_OPS.md)
-
-
-The `ledgerdb` CLI is the primary operator interface.
-* **Repo Management:** `init`, `clone`, `status`.
-* **Data Ops:** `put`, `get`, `patch`, `delete`.
-* **Indexing:** `index sync` to build SQLite projections.
-* **Debug:** `inspect`, `verify`, `log`.
-* **Maintenance:** `maintenance gc`, `maintenance snapshot`.
-* **Logging:** `--log-level` and `--log-format` flags (or `LEDGERDB_LOG_LEVEL`, `LEDGERDB_LOG_FORMAT` env vars) to control verbosity and JSON output.
-* **Signing:** `--sign` and `--sign-key` (or `LEDGERDB_GIT_SIGN`, `LEDGERDB_GIT_SIGN_KEY`) to sign Git commits.
-* **Sync:** writes auto-fetch and auto-push by default (`--sync=false` to disable; `LEDGERDB_AUTO_SYNC=false`).
-* **Dev Checks:** `go test ./...`, `go test -race ./...`, `go vet ./...`, `golangci-lint run` (uses `.golangci.yml`).
-
-### 11.1 CLI Quick Start
-
-```bash
-# Build
-go build ./cmd/ledgerdb
-
-# Initialize a bare repo (layout + history mode are configurable)
-ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode append
-# Compact mode (single tx per doc, no history)
-ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history-mode amend
-
-# Apply a collection schema
-ledgerdb collection apply users --schema ./schemas/user.json --indexes "email,role"
-
-# Write/read documents
-ledgerdb doc put users "usr_123" --payload '{"name":"Alice","role":"admin"}'
-ledgerdb doc get users "usr_123"
-ledgerdb doc patch users "usr_123" --ops '[{"op":"replace","path":"/role","value":"viewer"}]'
-ledgerdb doc delete users "usr_123"
-ledgerdb doc log users "usr_123"
-
-# Disable autosync (offline mode)
-ledgerdb --sync=false doc put users "usr_123" --payload '{"name":"Alice","role":"admin"}'
-
-# Sign commits (requires git signing configured)
-ledgerdb --sign doc put users "usr_123" --payload '{"name":"Alice","role":"admin"}'
-
-# Verify integrity (deep rehydrate)
-ledgerdb integrity verify --deep
-
-# Sync SQLite index (per-collection tables)
-ledgerdb index sync --db ./index.db --batch-commits 200 --fast --mode state
-
-# Watch SQLite index (poll for new commits)
-ledgerdb index watch --db ./index.db --interval 5s --batch-commits 200 --fast --mode state
-
-# One-shot sync with watch command (no loop)
-ledgerdb index watch --db ./index.db --once --batch-commits 200 --fast --mode state
-
-# Poll with jitter and silence no-op output
-ledgerdb index watch --db ./index.db --interval 5s --jitter 1s --only-changes --quiet --batch-commits 200 --fast --mode state
-
-# Inspect a tx blob by git object hash
-ledgerdb inspect blob <object_hash>
-
-# Maintenance
-ledgerdb maintenance gc --prune=now
-ledgerdb maintenance snapshot --threshold 50
+    CLI --> Core
+    GoSDK --> Core
+    TSSDK -.shells out.-> CLI
+    Core -->|TxV3 blobs + CAS| Git
+    Core -->|tail commit log| SQLite
+    Git <-->|fetch / push| Remote
 ```
 
-### 11.2 Build & Install (Makefile)
+The deep version of this diagram — including the state tree, the manifest, the integrity chain, and the failure semantics under concurrent writers — is at [Architecture Overview](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Architecture-Overview).
 
-```bash
-make build
-make install
-```
+A note on what LedgerDB is **not**. There is no LedgerDB server. There is no gRPC API surface. There is no built-in raft or paxos. "Replication" in LedgerDB means "git remotes." If you want strict multi-writer linearizability you put the writes through a single instance; if you want eventual consistency you give every replica a remote and let them push and pull. The wiki page [Replication](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Replication) is explicit about what the resulting consistency model is.
 
-* **Override paths:** `make install PREFIX=/usr/local`
-* **Shared libs:** `make build-core-shared` (falls back to archive if unsupported).
+## Wiki and documentation
 
-### 11.3 Go SDK (Core)
+The deep reference is at [github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki). The wiki is organized into six sections, each with an overview page and a set of topical pages. The [wiki Home](https://github.com/osvaldoandrade/ledgerdb/wiki/Home) is the entry point; the [Quick paths](#quick-paths) table above is the same table the wiki Home uses, abbreviated for the README.
 
-The Go SDK (`github.com/osvaldoandrade/ledgerdb/pkg/ledgerdbsdk`) uses the core services directly (no CLI dependency). It configures the SQLite watch and exposes SQL + key-value reads.
+Two narrower reference sets live alongside the wiki and are linked from individual wiki pages:
 
-```go
-cfg := ledgerdbsdk.DefaultConfig("/path/to/ledgerdb.git")
-cfg.AutoWatch = true
+The `docs/` directory holds the design documents and the operator references. The most load-bearing ones:
 
-ctx := context.Background()
-client, err := ledgerdbsdk.Open(ctx, cfg)
-if err != nil {
-  panic(err)
-}
-defer client.Close()
+- [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) — the explicit list of surfaces v1.0 will freeze (TxV3 wire format, CLI command surface, public Go SDK types, manifest schema) and the surfaces that remain mutable (everything under `internal/`, the SQLite sidecar schema, log message strings).
+- [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) — the field guide for tuning throughput: when to choose sharded vs. flat layout, the cost of signing, the `index watch` interval / jitter / batch trade, snapshot policy, and the CAS retry policy.
+- [`docs/DEPRECATION.md`](docs/DEPRECATION.md) — how surfaces are removed: deprecation warnings first, then removal on the next minor (pre-v1.0) or the next major (post-v1.0).
+- [`docs/PITR.md`](docs/PITR.md) — point-in-time recovery using the immutable history.
+- [`docs/REPLICATION_HA.md`](docs/REPLICATION_HA.md) — the practical patterns for multi-writer replication on top of git remotes.
+- [`docs/ALERTS.md`](docs/ALERTS.md) — the recommended alerts for an `index watch` deployment.
+- The numbered design notes (`docs/01_STORAGE_INTERFACE.md` through `docs/10_BLOBS.md`) capture the underlying design decisions; new RFCs continue the same sequence per `GOVERNANCE.md` §3.
 
-doc, _ := client.Get(ctx, "tasks", "task_0001") // key-value (ledger)
-rows, _ := client.Query(ctx, "SELECT doc_id, payload FROM collection_tasks WHERE status = ?", "done")
-_ = rows
-```
+[`ROADMAP.md`](ROADMAP.md) is the summary of active epics with links to their GitHub issues. Read it before opening a feature request to check whether someone is already on it.
 
-### 11.4 TypeScript SDK (CLI Bridge)
+## Release cadence
 
-```bash
-npm config set @osvaldoandrade:registry https://npm.pkg.github.com
+LedgerDB ships on a predictable, low-ceremony cadence.
 
-npm install @osvaldoandrade/ledgerdb
-```
+Minor releases (`0.x` → `0.(x+1)`) target the **first Tuesday of each month**. They bundle whatever has landed on `main` since the previous minor. If the first Tuesday falls on a holiday or the release pipeline is unhealthy, the release slips to the next business day rather than cutting from a broken state. Patch releases (`0.x.y` → `0.x.(y+1)`) are cut on demand for bug fixes and security patches between minors — there is no fixed schedule, and when a fix needs to ship, it ships.
 
-```ts
-import { LedgerDBClient } from "@osvaldoandrade/ledgerdb";
+Releases are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml). The workflow builds the CLI for every supported platform, attaches the binaries to a GitHub Release, and publishes the npm package [`@osvaldoandrade/ledgerdb`](https://www.npmjs.com/package/@osvaldoandrade/ledgerdb) automatically so that the `npm install -g` install path stays current with each tag. The install script (`install.sh`) reads the GitHub Release feed directly, so it picks up the new binary on the same cadence.
 
-const client = new LedgerDBClient({
-  repoPath: "/path/to/ledgerdb.git",
-});
+The pre-v1.0 caveat applies while the series is still `0.x`: minor releases may include breaking changes. When they do, the release notes call them out explicitly and link migration guidance, and the change goes through the deprecation flow in [`docs/DEPRECATION.md`](docs/DEPRECATION.md) wherever feasible. [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) is the canonical statement of what v1.0 will freeze and what stays mutable. Once v1.0 is tagged, LedgerDB adopts strict semantic versioning — major bumps for any change to a frozen surface, minor bumps for additive changes, patch bumps for behaviour-preserving fixes.
 
-await client.put("tasks", "task_0001", { title: "Ship v1" });
-const doc = await client.get("tasks", "task_0001");
-console.log(doc);
-```
+## License
 
-* **Binary override:** set `LEDGERDB_BIN` to a preinstalled binary.
-* **Skip download:** set `LEDGERDB_SKIP_DOWNLOAD=1`.
+LedgerDB is licensed under the terms in [`LICENSE`](LICENSE) at the repository root.
 
+## Contributing
 
----
+Issues and pull requests are accepted on GitHub at [github.com/osvaldoandrade/ledgerdb](https://github.com/osvaldoandrade/ledgerdb). Before sending a PR, read the four governance documents that define how the project is run:
 
-## 12. Client SDK Specifications
-[`SDK`](docs/09_SDK_SPECS.md)
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — development environment setup, project layout, the conventional-commit rules, branch naming, and the DCO sign-off requirement (`git commit -s` is mandatory).
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — the behavioural baseline expected of contributors and reviewers.
+- [`GOVERNANCE.md`](GOVERNANCE.md) — the decision model (lazy consensus with a 7-day window, except for changes to frozen surfaces which require explicit maintainer approval) and the RFC / ADR process for substantial design changes.
+- [`SECURITY.md`](SECURITY.md) — the coordinated-disclosure policy, the supported-versions matrix, and the severity rubric. Do not file public issues for security bugs.
 
-
-Standardization for language-specific implementations (Go, Node.js, Rust).
-* **Smart Client Requirements:** All logic regarding CAS, hashing, and rehydration must be implemented in the client SDK to maintain the "Dumb Storage" promise.
-
----
-
-## 13. Future Work & Extensions
-
-* **Blob Storage:** Handling large binary assets (images/PDFs) via `git-lfs` integration.
-* **Archive Nodes:** Strategies for "Cold Storage" and history truncation (pruning).
-
----
-
-## 14. Release cadence
-
-LedgerDB ships on a predictable, low-ceremony cadence:
-
-* **Minor releases (0.x → 0.(x+1))** target the **first Tuesday of each month**. They bundle the features and fixes that landed on `main` since the previous minor. If the first Tuesday falls on a holiday or the release pipeline is unhealthy, the release slips to the next business day rather than cutting from a broken state.
-* **Patch releases (0.x.y → 0.x.(y+1))** are cut on demand for bug fixes and security patches between minors. There is no fixed schedule — when a fix needs to ship, it ships.
-* Releases are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml). The workflow builds the CLI for all supported platforms, attaches binaries to a GitHub Release, and updates the npm package [`@osvaldoandrade/ledgerdb`](https://www.npmjs.com/package/@osvaldoandrade/ledgerdb) automatically so the `npm i -g` install path stays current with each tag.
-* **Pre-v1.0 caveat:** while we are in the 0.x series, minor releases may include breaking changes. See [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) for the full v1.0 stability contract, the surfaces that will be frozen, and the surfaces that remain mutable. Once v1.0 is tagged, LedgerDB adopts strict semantic versioning.
-* The full list of active epics and their target releases lives in [`ROADMAP.md`](ROADMAP.md).
+Small PRs land fastest. The repository follows the rule of thumb in `CONTRIBUTING.md` §3.1: if you cannot summarize the change in one sentence without the word "and", split it.
