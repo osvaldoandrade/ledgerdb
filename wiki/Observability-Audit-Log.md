@@ -147,7 +147,7 @@ The audit logger is independent of the structured-log level. Even with `--log-le
 - [Observability Overview](Observability-Overview)
 - [Observability Metrics](Observability-Metrics)
 - [Observability Logging](Observability-Logging)
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy)
+- [Operations and CLI Strategy](SDK-CLI-Reference)
 - `internal/app/index/audit.go` — the writer, the schema, the flush loop, and the `CombinedObserver` fan-out.
 - `internal/app/index/ports.go` — the `Observer` interface that `AuditLogger` implements.
 - `internal/cli/commands.go` (lines 504-531) — the CLI wiring that constructs the audit logger and composes it with metrics.

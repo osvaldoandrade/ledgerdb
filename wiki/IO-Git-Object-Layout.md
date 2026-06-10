@@ -149,11 +149,11 @@ LedgerDB does not manage the git object database. `Store.RunGC` at `internal/inf
 
 The TxV3 protobuf format inside each blob is documented in [IO-TxV3-Format](IO-TxV3-Format). The `state/` tree's role in cheap indexer replication is documented in [IO-State-Tree](IO-State-Tree). The transfer protocol that ships these objects between machines is documented in [IO-Sync-Protocol](IO-Sync-Protocol). The bundle format that wraps the entire object graph for offline transport is documented in [IO-Bundle-Format](IO-Bundle-Format).
 
-The integrity verifier that walks the parent chain and re-checks every hash is on [Integrity-and-Security-Strategy](Integrity-and-Security-Strategy). The migration tooling that operators use to flip between stream layouts is on [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy).
+The integrity verifier that walks the parent chain and re-checks every hash is on [Integrity-and-Security-Strategy](Concepts-Integrity-And-Verification). The migration tooling that operators use to flip between stream layouts is on [Operations-and-CLI-Strategy](SDK-CLI-Reference).
 
 ## See also
 
 - [IO-Overview](IO-Overview)
 - [IO-TxV3-Format](IO-TxV3-Format)
 - [IO-State-Tree](IO-State-Tree)
-- [Storage-Engine-and-Interface](Storage-Engine-and-Interface)
+- [Storage-Engine-and-Interface](Concepts-Storage-Layout)

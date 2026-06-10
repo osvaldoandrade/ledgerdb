@@ -12,7 +12,7 @@ Reads in LedgerDB split cleanly into two paths. The first is a direct blob read 
 
 ## What this page does not cover
 
-- Query language semantics. `ledgerdb query` and the underlying SQL surface are documented in [Querying and Indexing Strategy](Querying-and-Indexing-Strategy).
+- Query language semantics. `ledgerdb query` and the underlying SQL surface are documented in [Querying and Indexing Strategy](Concepts-Indexing).
 - Watcher operability beyond performance — error handling, audit log, metrics. See [Observability Overview](Observability-Overview) and the per-pillar pages.
 - Concurrent reader scaling. The benches are single-goroutine; multi-reader behavior is bounded by the underlying SQLite WAL mode and the Git pack reader's locking, neither of which is exercised by the current harness.
 
@@ -165,7 +165,7 @@ The decision lives one level above LedgerDB: does the application need filter/ag
 - [Performance Write Throughput](Performance-Write-Throughput)
 - [Performance Tuning Knobs](Performance-Tuning-Knobs)
 - [Performance Bench Harness](Performance-Bench-Harness)
-- [Querying and Indexing Strategy](Querying-and-Indexing-Strategy)
+- [Querying and Indexing Strategy](Concepts-Indexing)
 - [Observability Metrics](Observability-Metrics) — the `ledgerdb_index_sync_duration_seconds` histogram exposed by `index watch`.
 - `bench/reads_test.go` — direct-read benches.
 - `bench/sync_test.go` — sidecar catch-up benches.

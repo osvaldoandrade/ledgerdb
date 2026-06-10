@@ -48,6 +48,6 @@ Read [SDK CLI Reference](SDK-CLI-Reference) first if you want to understand the 
 
 ## See also
 
-- [CLI Reference](CLI-Reference) — the legacy single-page command reference that predates this section; the new SDK CLI Reference supersedes it.
-- [Client SDK Specifications](Client-SDK-Specifications) — the original design spec for the SDK surface.
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy) — design-time context for why the CLI is the canonical surface.
+- [CLI Reference](SDK-CLI-Reference) — the legacy single-page command reference that predates this section; the new SDK CLI Reference supersedes it.
+- [Client SDK Specifications](SDK-Overview) — the original design spec for the SDK surface.
+- [Operations and CLI Strategy](SDK-CLI-Reference) — design-time context for why the CLI is the canonical surface.

@@ -150,5 +150,5 @@ The second result is the cue to add `assignee` to the collection's index list. T
 
 - [SDK CLI Reference](SDK-CLI-Reference) — the rest of the CLI surface.
 - [SDK Go SDK](SDK-Go-SDK) — `Client.Query` and `Client.QueryPaginated` use the same SQLite sidecar that `query explain` inspects.
-- [Querying and Indexing Strategy](Querying-and-Indexing-Strategy) — design context for the indexes that show up in the plan.
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy) — why the CLI carries the explain/REPL surface rather than a separate tool.
+- [Querying and Indexing Strategy](Concepts-Indexing) — design context for the indexes that show up in the plan.
+- [Operations and CLI Strategy](SDK-CLI-Reference) — why the CLI carries the explain/REPL surface rather than a separate tool.

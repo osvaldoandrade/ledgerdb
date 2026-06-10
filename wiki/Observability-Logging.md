@@ -163,7 +163,7 @@ Logs are narrative, not quantitative. You cannot derive a histogram from log lin
 - [Observability Overview](Observability-Overview)
 - [Observability Metrics](Observability-Metrics)
 - [Observability Audit Log](Observability-Audit-Log)
-- [CLI Reference](CLI-Reference)
+- [CLI Reference](SDK-CLI-Reference)
 - `internal/platform/logger.go` — the constructor and the level/format parsers.
 - `internal/cli/root.go` — where the flags and environment defaults are wired.
 - `docs/ALERTS.md` — alert rules whose log-side companions follow the field conventions described here.

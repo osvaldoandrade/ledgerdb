@@ -63,9 +63,9 @@ The flow is: bytes are canonicalised, wrapped in TxV3, hashed, stored in git, mi
 
 ## What this section does not cover
 
-There is no producer protocol page, no worker protocol page, no consensus page. LedgerDB is single-writer per repository — concurrent writers on one machine serialise through the CAS loop on `refs/heads/main`; concurrent writers across machines serialise through `git push` and the non-fast-forward rule. There is no leader election because there is no cluster; there is no quorum because every replica is a clone. Multi-writer semantics are out of scope for the storage layer and are documented elsewhere under [Replication-and-Synchronization-Strategy](Replication-and-Synchronization-Strategy).
+There is no producer protocol page, no worker protocol page, no consensus page. LedgerDB is single-writer per repository — concurrent writers on one machine serialise through the CAS loop on `refs/heads/main`; concurrent writers across machines serialise through `git push` and the non-fast-forward rule. There is no leader election because there is no cluster; there is no quorum because every replica is a clone. Multi-writer semantics are out of scope for the storage layer and are documented elsewhere under [Replication-and-Synchronization-Strategy](Concepts-Replication).
 
-The SDK surface (the Go client, the JS client) is covered under [Client-SDK-Specifications](Client-SDK-Specifications). Operational concerns — backup cadence, GC scheduling, integrity verification — live under [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy). This section restricts itself to the bytes on disk and the bytes on the wire.
+The SDK surface (the Go client, the JS client) is covered under [Client-SDK-Specifications](SDK-Overview). Operational concerns — backup cadence, GC scheduling, integrity verification — live under [Operations-and-CLI-Strategy](SDK-CLI-Reference). This section restricts itself to the bytes on disk and the bytes on the wire.
 
 ## How to read the rest of the IO section
 
