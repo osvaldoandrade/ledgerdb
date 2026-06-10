@@ -71,23 +71,32 @@ known as an ADR, *architecture decision record*).
 
 Workflow:
 
-1. Open a pull request that **adds a new file under `docs/`**, numbered to
-   continue the existing sequence (e.g. `docs/10_MY_PROPOSAL.md`).
-2. The RFC document should cover:
+1. **Open a GitHub Issue** tagged `rfc` with the proposal. The issue body
+   should cover:
    - Context and problem statement.
    - Proposed design, with diagrams where useful.
    - Alternatives considered and why they were rejected.
    - Compatibility, migration, and rollout plan.
    - Open questions.
-3. Tag the PR with the `rfc` label and link any related issues.
-4. The standard 7-day lazy-consensus window applies. The maintainer will
-   either merge the document (marking it accepted) or request changes.
-5. Once merged, the ADR is the canonical record. Implementation PRs link
-   back to it.
+2. Link any related issues. Comment-driven discussion lives on the issue
+   thread.
+3. The standard 7-day lazy-consensus window applies. The maintainer will
+   either accept the proposal (closing the issue with an `accepted` label)
+   or request changes.
+4. **Once accepted, the maintainer commits the accepted design as a new
+   wiki page** under the relevant section of the project wiki
+   ([github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki)).
+   The wiki page is the canonical record going forward; the issue thread
+   stays linked from the page for historical context.
+5. Implementation PRs link back to the accepted issue and the resulting
+   wiki page.
 
 For very small design choices a short note in an issue is usually sufficient
 — RFCs are for changes that future contributors will want to *understand
-later*.
+later*. The wiki is the durable home for those decisions because it is
+editable in place as designs evolve and because it is the same surface the
+reference documentation already lives in; a separate, frozen ADR tree would
+drift out of sync with the running wiki within a release or two.
 
 ---
 

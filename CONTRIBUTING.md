@@ -79,10 +79,13 @@ A short tour of the directories you are most likely to touch:
 - `internal/domain/` — pure domain types (documents, transactions, refs).
 - `internal/infra/` — Git, SQLite, filesystem, and TxV3 protobuf adapters.
 - `pkg/ledgerdbsdk/` — public Go SDK; treat this as the **stable** surface.
-- `docs/` — design documents, ordered `01..09`, plus governance docs.
 
-Anything under `internal/` is private and may change without notice. Anything
-under `pkg/` follows the stability policy in `docs/V1_STABILITY.md`.
+Design and reference documentation lives in the project wiki at
+[github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki),
+not in this repository. Anything under `internal/` is private and may change
+without notice. Anything under `pkg/` follows the stability policy on the
+[v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1)
+wiki page.
 
 ---
 
@@ -160,7 +163,8 @@ Closes #N
 
 Breaking changes must include a `BREAKING CHANGE:` footer describing the
 migration. Before v1.0 we sometimes ship breakage in minor releases; see
-`docs/V1_STABILITY.md` for the full policy.
+the [v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1)
+wiki page for the full policy.
 
 Examples:
 
@@ -178,8 +182,11 @@ Work branches should be prefixed by their kind:
 
 - `feature/<short-slug>` — new functionality.
 - `fix/<short-slug>` — bug fixes.
-- `docs/<short-slug>` — docs-only changes.
-- `chore/<short-slug>` — build/CI/dependency work.
+- `chore/<short-slug>` — build, CI, dependency, or other repo-maintenance work.
+
+Documentation lives in the project wiki (a separate git repo,
+`ledgerdb.wiki.git`), not in this repository, so there is no
+`docs/<slug>` branch convention here.
 
 Keep slugs lowercase with hyphens, and short (≤ 5 words). Example:
 `feature/index-watch-jitter`.

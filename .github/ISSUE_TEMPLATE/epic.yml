@@ -20,7 +20,8 @@ body:
       description: |
         What is the underlying problem this epic addresses? Why does it
         matter for LedgerDB users, operators, or the project's path to
-        v1.0? Reference any relevant ADRs under `docs/`.
+        v1.0? Reference any relevant design pages in the
+        [project wiki](https://github.com/osvaldoandrade/ledgerdb/wiki).
     validations:
       required: true
 
@@ -61,10 +62,10 @@ body:
         Use a GitHub checklist so they can be checked off as they land.
         Link each child task issue once it is filed.
       value: |
-        - [ ] #TODO design ADR under `docs/`
+        - [ ] #TODO design RFC issue (tagged `rfc`) accepted and committed as a wiki page
         - [ ] #TODO scaffold opt-in flag plumbing
         - [ ] #TODO integration test
-        - [ ] #TODO docs + release-notes entry
+        - [ ] #TODO wiki page + release-notes entry
     validations:
       required: false
 

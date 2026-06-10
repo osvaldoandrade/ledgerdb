@@ -23,7 +23,8 @@
 #   expire after 365 days) rather than deleting objects from this workflow.
 #
 # See also:
-#   - docs/REPLICATION_HA.md  (replication & HA guidance)
+#   - https://github.com/osvaldoandrade/ledgerdb/wiki/Ops-Replication-HA
+#     (replication & HA guidance)
 #
 # =============================================================================
 

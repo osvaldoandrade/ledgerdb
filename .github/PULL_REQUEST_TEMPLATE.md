@@ -40,9 +40,9 @@ Closes #
 ## Checklist
 
 - [ ] Tests added or updated to cover the change
-- [ ] Docs updated if user-visible (README, `docs/`, command help text)
+- [ ] Docs updated if user-visible (README, project wiki, command help text)
 - [ ] No breaking changes — or, if there are, they are called out below
-      and follow the deprecation policy in `docs/DEPRECATION.md`
+      and follow the [Deprecation Policy](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-Deprecation)
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
 - [ ] DCO sign-off present (`git commit -s`)
 
@@ -52,5 +52,6 @@ Closes #
 Delete this section if there are none. Otherwise, describe:
 - What changed
 - What downstream users must do to migrate
-- Which deprecation cycle this lands in (see docs/DEPRECATION.md)
+- Which deprecation cycle this lands in
+  (see https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-Deprecation)
 -->

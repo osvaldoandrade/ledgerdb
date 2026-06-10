@@ -8,7 +8,7 @@ This README is the project front door. The wiki at [github.com/osvaldoandrade/le
 
 ## Read this README in order
 
-The sections below are arranged to be read top to bottom on a first pass. The "Quick paths" table is a shortcut for readers who already know what they want. The **Install** section explains the three supported install paths — the curl install script, the npm package, and `go install` — and what each one actually does. The **Quickstart** section walks through `ledgerdb init`, `collection apply`, `doc put`, `doc get`, and the optional `index watch` long-running process, with prose between commands explaining what is happening on disk. The **Architecture at a glance** section sketches the smart-client / dumb-storage split and links to the wiki's [Architecture Overview](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Architecture-Overview) for the deep version. The **Wiki and documentation** section is the map into the wiki and the design docs under `docs/`. The **Release cadence** section is the contract: when do you get a new minor, where does it land, and what does the pre-v1.0 caveat mean for breakage. The **License** and **Contributing** sections are pointers to the governance documents.
+The sections below are arranged to be read top to bottom on a first pass. The "Quick paths" table is a shortcut for readers who already know what they want. The **Install** section explains the three supported install paths — the curl install script, the npm package, and `go install` — and what each one actually does. The **Quickstart** section walks through `ledgerdb init`, `collection apply`, `doc put`, `doc get`, and the optional `index watch` long-running process, with prose between commands explaining what is happening on disk. The **Architecture at a glance** section sketches the smart-client / dumb-storage split and links to the wiki's [Architecture Overview](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Architecture-Overview) for the deep version. The **Wiki and documentation** section is the map into the project wiki, which is the single source of truth for design, operations, and reference documentation. The **Release cadence** section is the contract: when do you get a new minor, where does it land, and what does the pre-v1.0 caveat mean for breakage. The **License** and **Contributing** sections are pointers to the governance documents.
 
 ## Quick paths
 
@@ -23,8 +23,8 @@ The sections below are arranged to be read top to bottom on a first pass. The "Q
 | I want the full CLI reference | [SDK CLI Reference](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-CLI-Reference) |
 | I want to embed LedgerDB in a Go service | [Go SDK](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-Go-SDK) |
 | I want to call LedgerDB from Node | [TypeScript SDK](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-TypeScript-SDK) |
-| I want to tune throughput | [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) and [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) |
-| I want the v1.0 stability contract | [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) |
+| I want to tune throughput | [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) |
+| I want the v1.0 stability contract | [v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1) |
 
 ## Install
 
@@ -101,7 +101,7 @@ ledgerdb doc patch tasks "task_0001" --ops '[{"op":"replace","path":"/status","v
 ledgerdb doc log tasks "task_0001"
 ```
 
-Each `doc put` validates the payload against the collection schema, serializes it into a TxV3 protobuf blob, writes the blob into the git object database, updates the relevant state-tree paths, and commits the result against `refs/heads/main` using compare-and-swap. If another writer raced you and won the CAS, the command retries with exponential backoff (the default policy is five retries; see [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) for the knobs). `doc get` reads the latest state directly from the state tree. `doc patch` applies an RFC 6902 JSON patch and writes a new transaction whose parent is the previous one — the chain is what makes the ledger verifiable. `doc log` walks that chain and prints every revision of the document. The TxV3 wire format and the on-disk layout are documented at [TxV3 Format](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-TxV3-Format) and [Git Object Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-Git-Object-Layout).
+Each `doc put` validates the payload against the collection schema, serializes it into a TxV3 protobuf blob, writes the blob into the git object database, updates the relevant state-tree paths, and commits the result against `refs/heads/main` using compare-and-swap. If another writer raced you and won the CAS, the command retries with exponential backoff (the default policy is five retries; see [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) for the knobs). `doc get` reads the latest state directly from the state tree. `doc patch` applies an RFC 6902 JSON patch and writes a new transaction whose parent is the previous one — the chain is what makes the ledger verifiable. `doc log` walks that chain and prints every revision of the document. The TxV3 wire format and the on-disk layout are documented at [TxV3 Format](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-TxV3-Format) and [Git Object Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-Git-Object-Layout).
 
 By default, `doc put` and `doc patch` auto-fetch from `origin` before the CAS and auto-push after a successful commit. Pass `--sync=false` (or set `LEDGERDB_AUTO_SYNC=false`) to keep everything local; this is the right choice on a laptop with no remote configured. Commit signing is opt-in via `--sign` or `LEDGERDB_GIT_SIGN=1`, and follows your local git signing configuration — see [Integrity and Verification](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Integrity-And-Verification) for what signing actually buys you.
 
@@ -122,7 +122,7 @@ ledgerdb index watch \
 sqlite3 ./index.db 'SELECT doc_id, payload FROM collection_tasks WHERE status = "done";'
 ```
 
-The default mode (`--mode state`) reads from the state tree and applies only the documents that actually changed since the last pass, which is O(changes) rather than O(history). The other modes, the meaning of `--fast` and `--batch-commits`, and the tradeoff between replication lag and SQLite fsync cost are documented in [Run With Sidecar Index](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-With-Sidecar-Index) and in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) §4. The full SQLite schema and the rules for what is and is not a stable column are at [SQLite Schema](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-SQLite-Schema).
+The default mode (`--mode state`) reads from the state tree and applies only the documents that actually changed since the last pass, which is O(changes) rather than O(history). The other modes, the meaning of `--fast` and `--batch-commits`, and the tradeoff between replication lag and SQLite fsync cost are documented in [Run With Sidecar Index](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-With-Sidecar-Index) and on [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs). The full SQLite schema and the rules for what is and is not a stable column are at [SQLite Schema](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-SQLite-Schema).
 
 ### Step 5: The REPL
 
@@ -158,21 +158,19 @@ A note on what LedgerDB is **not**. There is no LedgerDB server. There is no gRP
 
 ## Wiki and documentation
 
-The deep reference is at [github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki). The wiki is organized into six sections, each with an overview page and a set of topical pages. The [wiki Home](https://github.com/osvaldoandrade/ledgerdb/wiki/Home) is the entry point; the [Quick paths](#quick-paths) table above is the same table the wiki Home uses, abbreviated for the README.
+The wiki at [github.com/osvaldoandrade/ledgerdb/wiki](https://github.com/osvaldoandrade/ledgerdb/wiki) is the single source of truth for design, operations, and reference documentation. It is organised into eight sections, each with an overview page and a set of topical pages. The [wiki Home](https://github.com/osvaldoandrade/ledgerdb/wiki/Home) is the entry point; the [Quick paths](#quick-paths) table above is the same table the wiki Home uses, abbreviated for the README.
 
-Two narrower reference sets live alongside the wiki and are linked from individual wiki pages:
+The load-bearing reference pages — the ones the README and the issue templates link directly:
 
-The `docs/` directory holds the design documents and the operator references. The most load-bearing ones:
+- [v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1) — the explicit list of surfaces v1.0 will freeze (TxV3 wire format, CLI command surface, public Go SDK types, manifest schema) and the surfaces that remain mutable (everything under `internal/`, the SQLite sidecar schema, log message strings).
+- [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) — the field guide for tuning throughput: when to choose sharded vs. flat layout, the cost of signing, the `index watch` interval / jitter / batch trade, snapshot policy, and the CAS retry policy.
+- [Deprecation Policy](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-Deprecation) — how surfaces are removed: deprecation warnings first, then removal on the next minor (pre-v1.0) or the next major (post-v1.0).
+- [PITR](https://github.com/osvaldoandrade/ledgerdb/wiki/Ops-PITR) — point-in-time recovery using the immutable history.
+- [Replication and HA](https://github.com/osvaldoandrade/ledgerdb/wiki/Ops-Replication-HA) — the practical patterns for multi-writer replication on top of git remotes.
+- [Alerts](https://github.com/osvaldoandrade/ledgerdb/wiki/Ops-Alerts) — the recommended Prometheus alerts for an `index watch` deployment.
+- [Blobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Ops-Blobs) — the planned binary-blob design layered on `git-lfs`.
 
-- [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) — the explicit list of surfaces v1.0 will freeze (TxV3 wire format, CLI command surface, public Go SDK types, manifest schema) and the surfaces that remain mutable (everything under `internal/`, the SQLite sidecar schema, log message strings).
-- [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) — the field guide for tuning throughput: when to choose sharded vs. flat layout, the cost of signing, the `index watch` interval / jitter / batch trade, snapshot policy, and the CAS retry policy.
-- [`docs/DEPRECATION.md`](docs/DEPRECATION.md) — how surfaces are removed: deprecation warnings first, then removal on the next minor (pre-v1.0) or the next major (post-v1.0).
-- [`docs/PITR.md`](docs/PITR.md) — point-in-time recovery using the immutable history.
-- [`docs/REPLICATION_HA.md`](docs/REPLICATION_HA.md) — the practical patterns for multi-writer replication on top of git remotes.
-- [`docs/ALERTS.md`](docs/ALERTS.md) — the recommended alerts for an `index watch` deployment.
-- The numbered design notes (`docs/01_STORAGE_INTERFACE.md` through `docs/10_BLOBS.md`) capture the underlying design decisions; new RFCs continue the same sequence per `GOVERNANCE.md` §3.
-
-[`ROADMAP.md`](ROADMAP.md) is the summary of active epics with links to their GitHub issues. Read it before opening a feature request to check whether someone is already on it.
+Design decisions are recorded as wiki pages under the appropriate section; the RFC workflow is in `GOVERNANCE.md` §3. [`ROADMAP.md`](ROADMAP.md) is the summary of active epics with links to their GitHub issues. Read it before opening a feature request to check whether someone is already on it.
 
 ## Release cadence
 
@@ -182,7 +180,7 @@ Minor releases (`0.x` → `0.(x+1)`) target the **first Tuesday of each month**.
 
 Releases are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml). The workflow builds the CLI for every supported platform, attaches the binaries to a GitHub Release, and publishes the npm package [`@osvaldoandrade/ledgerdb`](https://www.npmjs.com/package/@osvaldoandrade/ledgerdb) automatically so that the `npm install -g` install path stays current with each tag. The install script (`install.sh`) reads the GitHub Release feed directly, so it picks up the new binary on the same cadence.
 
-The pre-v1.0 caveat applies while the series is still `0.x`: minor releases may include breaking changes. When they do, the release notes call them out explicitly and link migration guidance, and the change goes through the deprecation flow in [`docs/DEPRECATION.md`](docs/DEPRECATION.md) wherever feasible. [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md) is the canonical statement of what v1.0 will freeze and what stays mutable. Once v1.0 is tagged, LedgerDB adopts strict semantic versioning — major bumps for any change to a frozen surface, minor bumps for additive changes, patch bumps for behaviour-preserving fixes.
+The pre-v1.0 caveat applies while the series is still `0.x`: minor releases may include breaking changes. When they do, the release notes call them out explicitly and link migration guidance, and the change goes through the deprecation flow on [Deprecation Policy](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-Deprecation) wherever feasible. [v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1) is the canonical statement of what v1.0 will freeze and what stays mutable. Once v1.0 is tagged, LedgerDB adopts strict semantic versioning — major bumps for any change to a frozen surface, minor bumps for additive changes, patch bumps for behaviour-preserving fixes.
 
 ## License
 
