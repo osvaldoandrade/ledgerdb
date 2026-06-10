@@ -153,7 +153,7 @@ The bundle path does not interact with the sync path; they are independent trans
 
 ## What this page does not cover
 
-The on-disk shape of what gets pushed — the object database, the ref structure, the tree layout — is on [IO-Git-Object-Layout](IO-Git-Object-Layout). The bundle format used for offline transport is on [IO-Bundle-Format](IO-Bundle-Format). The replication-and-sync model at the conceptual level (offline-first, multi-replica reads, write authority) is on [Replication-and-Synchronization-Strategy](Replication-and-Synchronization-Strategy).
+The on-disk shape of what gets pushed — the object database, the ref structure, the tree layout — is on [IO-Git-Object-Layout](IO-Git-Object-Layout). The bundle format used for offline transport is on [IO-Bundle-Format](IO-Bundle-Format). The replication-and-sync model at the conceptual level (offline-first, multi-replica reads, write authority) is on [Replication-and-Synchronization-Strategy](Concepts-Replication).
 
 The application semantics of `ErrSyncConflict` — what the CLI prints, how the SDK surfaces it, what the recovery procedure looks like — is on [Use-Cases-Conflict-Detection-and-Resolution](Use-Cases-Conflict-Detection-and-Resolution).
 
@@ -162,4 +162,4 @@ The application semantics of `ErrSyncConflict` — what the CLI prints, how the 
 - [IO-Overview](IO-Overview)
 - [IO-Git-Object-Layout](IO-Git-Object-Layout)
 - [IO-Bundle-Format](IO-Bundle-Format)
-- [Replication-and-Synchronization-Strategy](Replication-and-Synchronization-Strategy)
+- [Replication-and-Synchronization-Strategy](Concepts-Replication)

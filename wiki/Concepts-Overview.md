@@ -18,7 +18,7 @@ The first two layers travel together inside the same git commit. The third is pe
 
 ## What this section covers
 
-The pages that follow build the concept stack from the inside out. They are not a tutorial; they explain why the system is shaped the way it is. If you want to run LedgerDB first and read the rationale later, start with the [Get Started](Get-Started) page and come back here.
+The pages that follow build the concept stack from the inside out. They are not a tutorial; they explain why the system is shaped the way it is. If you want to run LedgerDB first and read the rationale later, start with the [Get Started](Get-Started-Overview) page and come back here.
 
 [Documents and Collections](Concepts-Documents-And-Collections) covers the data model: how a collection declares its JSON schema and index specs, what a document ID is, what gets written when you call `doc put`. [Transactions and TxV3](Concepts-Transactions-And-TxV3) walks the protobuf format and the deterministic encoding that makes blob hashing stable. [History Modes](Concepts-History-Modes) explains the choice between `append` (full audit, every tx kept) and `amend` (compacted, only the current state retained).
 

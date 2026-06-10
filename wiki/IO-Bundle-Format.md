@@ -158,11 +158,11 @@ When the sidecar is embedded, the restore process silently extracts it into the 
 
 ## What this page does not cover
 
-The CLI flags, the JSON output shape, and the spinner UI of `ledgerdb backup` / `restore` / `truncate` are part of the CLI reference at [CLI-Reference](CLI-Reference) and the operational guidance at [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy). The integrity verifier invoked at the end of restore is documented at [Integrity-and-Security-Strategy](Integrity-and-Security-Strategy). The on-disk shape of what the bundle contains — refs, trees, blobs, the TxV3 protobuf inside each blob — is documented at [IO-Git-Object-Layout](IO-Git-Object-Layout) and [IO-TxV3-Format](IO-TxV3-Format).
+The CLI flags, the JSON output shape, and the spinner UI of `ledgerdb backup` / `restore` / `truncate` are part of the CLI reference at [CLI-Reference](SDK-CLI-Reference) and the operational guidance at [Operations-and-CLI-Strategy](SDK-CLI-Reference). The integrity verifier invoked at the end of restore is documented at [Integrity-and-Security-Strategy](Concepts-Integrity-And-Verification). The on-disk shape of what the bundle contains — refs, trees, blobs, the TxV3 protobuf inside each blob — is documented at [IO-Git-Object-Layout](IO-Git-Object-Layout) and [IO-TxV3-Format](IO-TxV3-Format).
 
 ## See also
 
 - [IO-Overview](IO-Overview)
 - [IO-Sync-Protocol](IO-Sync-Protocol)
 - [IO-Git-Object-Layout](IO-Git-Object-Layout)
-- [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy)
+- [Operations-and-CLI-Strategy](SDK-CLI-Reference)

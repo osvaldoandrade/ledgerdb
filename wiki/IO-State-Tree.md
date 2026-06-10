@@ -114,7 +114,7 @@ The `state/` tree can also legitimately be absent on individual streams when a d
 
 The on-disk path scheme — sharded vs flat, the `DOC_` prefix, the `HEAD` pointer file — is documented in [IO-Git-Object-Layout](IO-Git-Object-Layout). The TxV3 wire shape of each blob inside `state/` is the same shape covered in [IO-TxV3-Format](IO-TxV3-Format). The SQLite sidecar that the indexer writes into is documented in [IO-SQLite-Schema](IO-SQLite-Schema).
 
-The CLI command that drives indexing in a long-running loop (`ledgerdb index watch`), including the metrics and audit-log integrations, is covered in [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy). The Prometheus metrics emitted during sync — `ledgerdb_tx_applied_total`, `ledgerdb_sync_errors_total`, `ledgerdb_replication_lag_seconds`, `ledgerdb_index_sync_duration_seconds` — are defined in `internal/app/index/metrics.go:40-81`.
+The CLI command that drives indexing in a long-running loop (`ledgerdb index watch`), including the metrics and audit-log integrations, is covered in [Operations-and-CLI-Strategy](SDK-CLI-Reference). The Prometheus metrics emitted during sync — `ledgerdb_tx_applied_total`, `ledgerdb_sync_errors_total`, `ledgerdb_replication_lag_seconds`, `ledgerdb_index_sync_duration_seconds` — are defined in `internal/app/index/metrics.go:40-81`.
 
 ## See also
 
@@ -122,4 +122,4 @@ The CLI command that drives indexing in a long-running loop (`ledgerdb index wat
 - [IO-Git-Object-Layout](IO-Git-Object-Layout)
 - [IO-TxV3-Format](IO-TxV3-Format)
 - [IO-SQLite-Schema](IO-SQLite-Schema)
-- [Querying-and-Indexing-Strategy](Querying-and-Indexing-Strategy)
+- [Querying-and-Indexing-Strategy](Concepts-Indexing)

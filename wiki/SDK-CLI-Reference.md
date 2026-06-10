@@ -171,5 +171,5 @@ Errors are normalised through `NormalizeError` in `internal/cli/errors.go`. Vali
 - [SDK Go SDK](SDK-Go-SDK) — the in-process equivalent of these commands.
 - [SDK TypeScript SDK](SDK-TypeScript-SDK) — the Node bridge to these commands.
 - [SDK REPL And Query Explain](SDK-REPL-And-Query-Explain) — interactive use of `ledgerdb repl` and `query explain`.
-- [CLI Reference](CLI-Reference) — the older single-page summary; this page supersedes it.
-- [Operations and CLI Strategy](Operations-and-CLI-Strategy) — design rationale for the CLI-first surface.
+- [CLI Reference](SDK-CLI-Reference) — the older single-page summary; this page supersedes it.
+- [Operations and CLI Strategy](SDK-CLI-Reference) — design rationale for the CLI-first surface.

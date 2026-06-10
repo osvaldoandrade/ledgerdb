@@ -154,13 +154,13 @@ The sidecar file lives wherever the operator put it. The CLI defaults to `<repo>
 
 ## What this page does not cover
 
-The TxV3 protobuf format the indexer decodes from is on [IO-TxV3-Format](IO-TxV3-Format). The git tree the indexer reads from is on [IO-Git-Object-Layout](IO-Git-Object-Layout) and [IO-State-Tree](IO-State-Tree). The CLI for running indexing in a loop, the metrics, and the audit log are on [Operations-and-CLI-Strategy](Operations-and-CLI-Strategy).
+The TxV3 protobuf format the indexer decodes from is on [IO-TxV3-Format](IO-TxV3-Format). The git tree the indexer reads from is on [IO-Git-Object-Layout](IO-Git-Object-Layout) and [IO-State-Tree](IO-State-Tree). The CLI for running indexing in a loop, the metrics, and the audit log are on [Operations-and-CLI-Strategy](SDK-CLI-Reference).
 
-The application-level query patterns and the index-design guidance for collections — what to index, when to make an index `UNIQUE`, how to evolve the index set safely — are on [Querying-and-Indexing-Strategy](Querying-and-Indexing-Strategy).
+The application-level query patterns and the index-design guidance for collections — what to index, when to make an index `UNIQUE`, how to evolve the index set safely — are on [Querying-and-Indexing-Strategy](Concepts-Indexing).
 
 ## See also
 
 - [IO-Overview](IO-Overview)
 - [IO-State-Tree](IO-State-Tree)
 - [IO-TxV3-Format](IO-TxV3-Format)
-- [Querying-and-Indexing-Strategy](Querying-and-Indexing-Strategy)
+- [Querying-and-Indexing-Strategy](Concepts-Indexing)

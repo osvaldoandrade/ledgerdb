@@ -152,11 +152,11 @@ The encoder calls `Validate` before marshalling. The indexer calls it after deco
 
 The full disk layout — where these blobs live in the git tree, how multiple transactions on the same document chain together, the CAS update protocol that adds a new blob to a stream — is on [IO-Git-Object-Layout](IO-Git-Object-Layout). The parallel `state/` tree that mirrors only the latest blob per document is on [IO-State-Tree](IO-State-Tree). The SQLite sidecar that decodes these blobs into queryable rows is on [IO-SQLite-Schema](IO-SQLite-Schema).
 
-The application-level wrapping — how a CLI invocation builds a `domain.Transaction`, calls `Encode`, computes the hash, picks the parent, and submits it — is in the SDK reference at [Client-SDK-Specifications](Client-SDK-Specifications). The integrity verifier that replays the chain and re-checks hashes is in [Integrity-and-Security-Strategy](Integrity-and-Security-Strategy).
+The application-level wrapping — how a CLI invocation builds a `domain.Transaction`, calls `Encode`, computes the hash, picks the parent, and submits it — is in the SDK reference at [Client-SDK-Specifications](SDK-Overview). The integrity verifier that replays the chain and re-checks hashes is in [Integrity-and-Security-Strategy](Concepts-Integrity-And-Verification).
 
 ## See also
 
 - [IO-Overview](IO-Overview) — the framing for this section.
 - [IO-Git-Object-Layout](IO-Git-Object-Layout) — where TxV3 blobs live in the repository.
 - [IO-State-Tree](IO-State-Tree) — the latest-snapshot mirror that uses the same blob format.
-- [Storage-Engine-and-Interface](Storage-Engine-and-Interface) — the higher-level model these blobs implement.
+- [Storage-Engine-and-Interface](Concepts-Storage-Layout) — the higher-level model these blobs implement.

@@ -153,5 +153,5 @@ The example shells out for `collection apply` because the current `pkg/ledgerdbs
 - [SDK CLI Reference](SDK-CLI-Reference) — the canonical surface for everything in this package.
 - [SDK TypeScript SDK](SDK-TypeScript-SDK) — the Node bridge that shells out to the CLI; useful contrast.
 - [SDK REPL And Query Explain](SDK-REPL-And-Query-Explain) — how the same query path is used interactively.
-- [Querying and Indexing Strategy](Querying-and-Indexing-Strategy) — design context for the SQLite sidecar.
-- [Versioning and Conflict Resolution](Versioning-and-Conflict-Resolution) — the per-doc stream model behind `Get`/`Put`/`Patch`.
+- [Querying and Indexing Strategy](Concepts-Indexing) — design context for the SQLite sidecar.
+- [Versioning and Conflict Resolution](Concepts-Versioning-And-Causality) — the per-doc stream model behind `Get`/`Put`/`Patch`.
