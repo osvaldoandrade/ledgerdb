@@ -6,9 +6,10 @@ where detailed scope, child tasks, and acceptance criteria live. The
 ordering here is by epic number, not strict priority; the maintainer
 sequences work based on dependencies and contributor availability.
 
-For the formal stability plan and what v1.0 will guarantee, see
-[`docs/V1_STABILITY.md`](docs/V1_STABILITY.md). For our release schedule,
-see the **Release cadence** section in [`README.md`](README.md).
+For the formal stability plan and what v1.0 will guarantee, see the
+[v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1)
+wiki page. For our release schedule, see the **Release cadence** section in
+[`README.md`](README.md).
 
 ---
 
@@ -74,12 +75,15 @@ scaffolding, and improved logs/diagnostics.
 ## v1.0 stability plan
 
 The detailed scope of what v1.0 freezes (and what stays explicitly
-unstable) lives in [`docs/V1_STABILITY.md`](docs/V1_STABILITY.md). In
-short: the TxV3 wire format, the CLI command surface, the public Go SDK
-types, and the manifest schema are the four pillars that v1.0 will
-guarantee. Everything under `internal/` and the sidecar SQLite schema
-remain mutable.
+unstable) lives on the
+[v1.0 Contract](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-V1)
+wiki page. In short: the TxV3 wire format, the CLI command surface, the
+public Go SDK types, and the manifest schema are the four pillars that
+v1.0 will guarantee. Everything under `internal/` and the sidecar SQLite
+schema remain mutable.
 
 Until v1.0 ships, minor releases may include breaking changes. See the
 release cadence section of the README for how those land in practice, and
-`docs/DEPRECATION.md` for how we phase removals.
+the
+[Deprecation Policy](https://github.com/osvaldoandrade/ledgerdb/wiki/Stability-Deprecation)
+wiki page for how we phase removals.
