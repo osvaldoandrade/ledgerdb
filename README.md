@@ -84,24 +84,30 @@ ledgerdb init --name "LedgerDB" --repo ./ledgerdb.git --layout sharded --history
 
 ### Step 2: Declare a collection
 
+Run these commands from the directory containing `ledgerdb.git` and this repository's sample [`schemas/task.json`](schemas/task.json). The schema declares the task fields used below: `title`, `status`, `assignee`, and `priority`. If you installed only the binary, create `schemas/task.json` first; `ledgerdb schema scaffold tasks --minimal --output ./schemas/task.json` creates a starter object schema.
+
 ```sh
 ledgerdb collection apply tasks \
+  --repo ./ledgerdb.git \
   --schema ./schemas/task.json \
-  --indexes "status,assignee"
+  --indexes "status,assignee" \
+  --sync=false
 ```
 
-`collection apply` registers (or updates) a collection named `tasks` and binds an optional JSON Schema and an optional list of indexed fields to it. The schema is enforced on every subsequent `doc put` and `doc patch`; an index entry causes the SQLite sidecar to materialize that column on the per-collection table for fast equality and range queries. Composite indexes and unique constraints are supported — see [Indexing](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Indexing) for the syntax. The schema and index list are themselves stored in the manifest, so every replica that fetches your repository ends up with the same collection definition.
+`collection apply` creates (or updates) the collection definition at `ledgerdb.git/collections/tasks/`, writing `schema.json` and `indexes.json`. The `--schema` file must exist before you apply it. Pass `--repo ./ledgerdb.git` on subsequent commands too: the default is the current directory (`.`), and `init --repo` does not change that default. `--sync=false` keeps this example local. The SQLite sidecar creates expression indexes on the declared JSON fields; composite indexes and unique constraints are supported — see [Indexing](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Indexing) for the syntax.
 
 ### Step 3: Write and read documents
 
 ```sh
-ledgerdb doc put tasks "task_0001" --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
-ledgerdb doc get tasks "task_0001"
-ledgerdb doc patch tasks "task_0001" --ops '[{"op":"replace","path":"/status","value":"done"}]'
-ledgerdb doc log tasks "task_0001"
+ledgerdb doc put tasks "task_0001" --repo ./ledgerdb.git --sync=false \
+  --payload '{"title":"Ship v1","status":"todo","priority":"high"}'
+ledgerdb doc get tasks "task_0001" --repo ./ledgerdb.git
+ledgerdb doc patch tasks "task_0001" --repo ./ledgerdb.git --sync=false \
+  --ops '[{"op":"replace","path":"/status","value":"done"}]'
+ledgerdb doc log tasks "task_0001" --repo ./ledgerdb.git
 ```
 
-Each `doc put` validates the payload against the collection schema, serializes it into a TxV3 protobuf blob, writes the blob into the git object database, updates the relevant state-tree paths, and commits the result against `refs/heads/main` using compare-and-swap. If another writer raced you and won the CAS, the command retries with exponential backoff (the default policy is five retries; see [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) for the knobs). `doc get` reads the latest state directly from the state tree. `doc patch` applies an RFC 6902 JSON patch and writes a new transaction whose parent is the previous one — the chain is what makes the ledger verifiable. `doc log` walks that chain and prints every revision of the document. The TxV3 wire format and the on-disk layout are documented at [TxV3 Format](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-TxV3-Format) and [Git Object Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-Git-Object-Layout).
+Each `doc put` canonicalizes the JSON payload, serializes it into a TxV3 protobuf blob, writes the blob into the git object database, updates the relevant state-tree paths, and commits the result against `refs/heads/main` using compare-and-swap. If another writer raced you and won the CAS, the command retries with exponential backoff (the default policy is five retries; see [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs) for the knobs). `doc get` reads the latest state directly from the state tree. `doc patch` applies an RFC 6902 JSON patch and writes a new transaction whose parent is the previous one — the chain is what makes the ledger verifiable. `doc log` walks that chain and prints every revision of the document. The TxV3 wire format and the on-disk layout are documented at [TxV3 Format](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-TxV3-Format) and [Git Object Layout](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-Git-Object-Layout).
 
 By default, `doc put` and `doc patch` auto-fetch from `origin` before the CAS and auto-push after a successful commit. Pass `--sync=false` (or set `LEDGERDB_AUTO_SYNC=false`) to keep everything local; this is the right choice on a laptop with no remote configured. Commit signing is opt-in via `--sign` or `LEDGERDB_GIT_SIGN=1`, and follows your local git signing configuration — see [Integrity and Verification](https://github.com/osvaldoandrade/ledgerdb/wiki/Concepts-Integrity-And-Verification) for what signing actually buys you.
 
@@ -109,6 +115,7 @@ By default, `doc put` and `doc patch` auto-fetch from `origin` before the CAS an
 
 ```sh
 ledgerdb index watch \
+  --repo ./ledgerdb.git \
   --db ./index.db \
   --mode state \
   --interval 1s \
@@ -119,14 +126,14 @@ ledgerdb index watch \
 `index watch` is the only long-running process LedgerDB ships. It polls the repository's commit log, applies new changes to a SQLite database at the path you give it, and (optionally) exposes Prometheus metrics and an audit log. Once it is running, you can query the same data through SQL:
 
 ```sh
-sqlite3 ./index.db 'SELECT doc_id, payload FROM collection_tasks WHERE status = "done";'
+sqlite3 ./index.db "SELECT doc_id, payload FROM collection_tasks WHERE json_extract(payload, '$.status') = 'done';"
 ```
 
 The default mode (`--mode state`) reads from the state tree and applies only the documents that actually changed since the last pass, which is O(changes) rather than O(history). The other modes, the meaning of `--fast` and `--batch-commits`, and the tradeoff between replication lag and SQLite fsync cost are documented in [Run With Sidecar Index](https://github.com/osvaldoandrade/ledgerdb/wiki/Get-Started-Run-With-Sidecar-Index) and on [Tuning Knobs](https://github.com/osvaldoandrade/ledgerdb/wiki/Performance-Tuning-Knobs). The full SQLite schema and the rules for what is and is not a stable column are at [SQLite Schema](https://github.com/osvaldoandrade/ledgerdb/wiki/IO-SQLite-Schema).
 
 ### Step 5: The REPL
 
-For interactive exploration, `ledgerdb repl` opens a session that supports SQL queries, `doc get`/`doc log` shortcuts, and `query explain` for inspecting the SQLite query plan against your indexes. The REPL is documented at [REPL and Query Explain](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-REPL-And-Query-Explain).
+For interactive exploration, `ledgerdb repl --repo ./ledgerdb.git` opens a session that supports SQL queries, `doc get`/`doc log` shortcuts, and `query explain` for inspecting the SQLite query plan against your indexes. The REPL is documented at [REPL and Query Explain](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-REPL-And-Query-Explain).
 
 This is the entire happy path. Every other command — `integrity verify`, `inspect blob`, `maintenance gc`, `maintenance snapshot`, `backup`, `restore`, `truncate` — is documented in the [SDK CLI Reference](https://github.com/osvaldoandrade/ledgerdb/wiki/SDK-CLI-Reference).
 
